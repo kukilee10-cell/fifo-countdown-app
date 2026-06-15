@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>FIFO Days Left</title>
+<title>FIFO Countdown</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -41,7 +41,187 @@
     min-height: 100dvh;
   }
 
-  /* ─── Header ─────────────────────────────────────────────── */
+  /* ════════════════════════════════════════════════════════════
+     SPLASH SCREEN
+  ════════════════════════════════════════════════════════════ */
+  #splash {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: #0d0f12;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 0.55s ease;
+    pointer-events: all;
+    overflow: hidden;
+  }
+  #splash.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Subtle grid lines in background */
+  #splash::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* Radial glow behind icon */
+  #splash::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(245,166,35,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Corner accent brackets */
+  .splash-corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-color: rgba(245,166,35,0.2);
+    border-style: solid;
+    animation: splashFadeIn 0.6s ease 0.1s both;
+  }
+  .splash-corner.tl { top: 20px; left: 20px; border-width: 2px 0 0 2px; }
+  .splash-corner.tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; }
+  .splash-corner.bl { bottom: 20px; left: 20px; border-width: 0 0 2px 2px; }
+  .splash-corner.br { bottom: 20px; right: 20px; border-width: 0 2px 2px 0; }
+
+  /* Badge pill */
+  .splash-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent-dk);
+    background: rgba(245,166,35,0.08);
+    border: 1px solid rgba(245,166,35,0.2);
+    border-radius: 99px;
+    padding: 5px 14px;
+    margin-bottom: 30px;
+    animation: splashFadeUp 0.5s ease 0.15s both;
+  }
+
+  /* Main icon */
+  .splash-icon {
+    font-size: 58px;
+    line-height: 1;
+    margin-bottom: 22px;
+    animation: splashFadeUp 0.5s ease 0.25s both, splashGlow 2s ease-in-out 0.8s infinite alternate;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* App name */
+  .splash-title {
+    font-family: var(--mono);
+    font-size: clamp(30px, 8.5vw, 42px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    line-height: 1;
+    animation: splashFadeUp 0.5s ease 0.35s both;
+    position: relative;
+    z-index: 1;
+  }
+  .splash-title .accent { color: var(--accent); }
+
+  /* Tagline */
+  .splash-tagline {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-top: 10px;
+    animation: splashFadeUp 0.5s ease 0.45s both;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Loading bar */
+  .splash-bar-wrap {
+    margin-top: 56px;
+    width: min(260px, 70vw);
+    height: 3px;
+    background: rgba(42,48,64,0.8);
+    border-radius: 99px;
+    overflow: hidden;
+    animation: splashFadeIn 0.4s ease 0.5s both;
+    position: relative;
+    z-index: 1;
+  }
+  .splash-bar-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent-dk), var(--accent), #ffc85a);
+    animation: splashLoad 1.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.55s forwards;
+    box-shadow: 0 0 8px rgba(245,166,35,0.5);
+  }
+
+  /* "Loading" label */
+  .splash-loading-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #3a4450;
+    margin-top: 10px;
+    animation: splashFadeIn 0.4s ease 0.65s both;
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes splashFadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes splashFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes splashLoad {
+    0%   { width: 0%; }
+    50%  { width: 70%; }
+    80%  { width: 90%; }
+    100% { width: 100%; }
+  }
+  @keyframes splashGlow {
+    from { filter: drop-shadow(0 0 10px rgba(245,166,35,0.2)); }
+    to   { filter: drop-shadow(0 0 28px rgba(245,166,35,0.55)); }
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     APP WRAPPER
+  ════════════════════════════════════════════════════════════ */
+  #app-wrapper {
+    display: contents;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+  }
+  #app-wrapper.visible {
+    opacity: 1;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     HEADER
+  ════════════════════════════════════════════════════════════ */
   header {
     display: flex;
     align-items: center;
@@ -77,7 +257,9 @@
   }
   .settings-btn:active { background: var(--border); }
 
-  /* ─── Main ────────────────────────────────────────────────── */
+  /* ════════════════════════════════════════════════════════════
+     MAIN
+  ════════════════════════════════════════════════════════════ */
   main {
     flex: 1;
     overflow-y: auto;
@@ -88,7 +270,6 @@
     gap: 16px;
   }
 
-  /* ─── No roster state ─────────────────────────────────────── */
   .empty-state {
     flex: 1;
     display: flex;
@@ -99,19 +280,9 @@
     padding: 40px 24px;
     gap: 16px;
   }
-  .empty-icon {
-    font-size: 56px;
-    line-height: 1;
-  }
-  .empty-title {
-    font-size: 22px;
-    font-weight: 700;
-  }
-  .empty-sub {
-    font-size: 16px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
+  .empty-icon { font-size: 56px; line-height: 1; }
+  .empty-title { font-size: 22px; font-weight: 700; }
+  .empty-sub { font-size: 16px; color: var(--muted); line-height: 1.5; }
   .cta-btn {
     margin-top: 8px;
     background: var(--accent);
@@ -129,7 +300,6 @@
   }
   .cta-btn:active { background: var(--accent-dk); transform: scale(0.98); }
 
-  /* ─── Countdown hero ──────────────────────────────────────── */
   .hero {
     background: var(--card);
     border: 1px solid var(--border);
@@ -163,7 +333,7 @@
     letter-spacing: -0.02em;
   }
   .hero-number.danger { color: var(--danger); }
-  .hero-number.done { color: var(--ok); }
+  .hero-number.done   { color: var(--ok); }
   .hero-unit {
     font-family: var(--mono);
     font-size: 16px;
@@ -172,17 +342,9 @@
     color: var(--muted);
     margin-top: 2px;
   }
-  .hero-sub {
-    margin-top: 14px;
-    font-size: 15px;
-    color: var(--muted);
-  }
-  .hero-sub strong {
-    color: var(--text);
-    font-weight: 600;
-  }
+  .hero-sub { margin-top: 14px; font-size: 15px; color: var(--muted); }
+  .hero-sub strong { color: var(--text); font-weight: 600; }
 
-  /* ─── Progress bar ────────────────────────────────────────── */
   .progress-wrap {
     margin-top: 18px;
     background: var(--border);
@@ -207,21 +369,14 @@
     color: var(--muted);
   }
 
-  /* ─── Stat grid ───────────────────────────────────────────── */
-  .stat-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .stat-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 16px 14px;
   }
-  .stat-card.wide {
-    grid-column: 1 / -1;
-  }
+  .stat-card.wide { grid-column: 1 / -1; }
   .stat-label {
     font-family: var(--mono);
     font-size: 10px;
@@ -239,15 +394,10 @@
     line-height: 1.1;
   }
   .stat-value.accent { color: var(--accent); }
-  .stat-value.ok { color: var(--ok); }
+  .stat-value.ok     { color: var(--ok); }
   .stat-value.danger { color: var(--danger); }
-  .stat-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
+  .stat-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
 
-  /* ─── Panel / Settings modal ──────────────────────────────── */
   .overlay {
     display: none;
     position: fixed;
@@ -286,11 +436,7 @@
     margin-bottom: 20px;
   }
 
-  /* ─── Form ────────────────────────────────────────────────── */
-  .form-group {
-    padding: 0 20px;
-    margin-bottom: 20px;
-  }
+  .form-group { padding: 0 20px; margin-bottom: 20px; }
   label {
     display: block;
     font-size: 13px;
@@ -317,22 +463,13 @@
     -webkit-appearance: none;
   }
   input[type="date"]:focus,
-  input[type="number"]:focus {
-    border-color: var(--accent);
-  }
+  input[type="number"]:focus { border-color: var(--accent); }
   input[type="number"] { -moz-appearance: textfield; }
   input::-webkit-inner-spin-button,
   input::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-  .stepper {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .stepper input {
-    flex: 1;
-    text-align: center;
-  }
+  .stepper { display: flex; align-items: center; gap: 12px; }
+  .stepper input { flex: 1; text-align: center; }
   .step-btn {
     background: var(--card);
     border: 1.5px solid var(--border);
@@ -341,7 +478,6 @@
     width: 56px;
     height: 56px;
     font-size: 26px;
-    font-weight: 400;
     cursor: pointer;
     flex-shrink: 0;
     transition: background 0.1s, border-color 0.1s;
@@ -389,12 +525,7 @@
   }
   .clear-btn:active { background: rgba(224,90,78,0.12); }
 
-  /* ─── Divider ─────────────────────────────────────────────── */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 4px 20px 20px;
-  }
+  .divider { height: 1px; background: var(--border); margin: 4px 20px 20px; }
   .section-head {
     font-family: var(--mono);
     font-size: 11px;
@@ -404,7 +535,6 @@
     padding: 0 20px 12px;
   }
 
-  /* ─── Today marker ────────────────────────────────────────── */
   .today-row {
     display: flex;
     align-items: center;
@@ -420,20 +550,37 @@
     flex-shrink: 0;
   }
 
-  /* ─── hidden ──────────────────────────────────────────────── */
   .hidden { display: none !important; }
 </style>
 </head>
 <body>
 
+<!-- SPLASH SCREEN -->
+<div id="splash" aria-hidden="true">
+  <div class="splash-corner tl"></div>
+  <div class="splash-corner tr"></div>
+  <div class="splash-corner bl"></div>
+  <div class="splash-corner br"></div>
+  <div class="splash-badge">FIFO Worker App</div>
+  <div class="splash-icon">⛏️</div>
+  <div class="splash-title">FIFO <span class="accent">Countdown</span></div>
+  <div class="splash-tagline">Counting down to R&amp;R</div>
+  <div class="splash-bar-wrap">
+    <div class="splash-bar-fill"></div>
+  </div>
+  <div class="splash-loading-label">Loading&hellip;</div>
+</div>
+
+<!-- APP -->
+<div id="app-wrapper">
+
 <header>
-  <div class="logo">FIFO <span>// Days Left</span></div>
+  <div class="logo">FIFO <span>// Countdown</span></div>
   <button class="settings-btn" onclick="openPanel()">⚙ Roster</button>
 </header>
 
 <main id="main-content"></main>
 
-<!-- Settings panel -->
 <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
   <div class="panel" id="panel">
     <div class="panel-handle"></div>
@@ -471,257 +618,154 @@
   </div>
 </div>
 
+</div><!-- #app-wrapper -->
+
 <script>
-// ─── State ────────────────────────────────────────────────────
-const STORAGE_KEY = 'fifo_roster_v1';
+// ── Splash ────────────────────────────────────────────────────
+(function () {
+  var SPLASH_DURATION = 2300;
+  var FADE_DURATION   = 550;
+  var splash  = document.getElementById('splash');
+  var appWrap = document.getElementById('app-wrapper');
+  setTimeout(function () {
+    splash.classList.add('fade-out');
+    appWrap.classList.add('visible');
+    setTimeout(function () { splash.style.display = 'none'; }, FADE_DURATION + 50);
+  }, SPLASH_DURATION);
+})();
 
+// ── Storage ───────────────────────────────────────────────────
+var STORAGE_KEY = 'fifo_roster_v1';
 function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
+  try { var r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; }
+  catch(e) { return null; }
 }
+function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
-function save(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
+// ── Date helpers ──────────────────────────────────────────────
+function today() { var d = new Date(); d.setHours(0,0,0,0); return d; }
+function parseDate(str) { var p = str.split('-').map(Number); return new Date(p[0], p[1]-1, p[2]); }
+function formatDate(d) { return d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric' }); }
+function diffDays(a, b) { return Math.round((b - a) / 86400000); }
+function addDays(d, n) { var r = new Date(d); r.setDate(r.getDate() + n); return r; }
 
-// ─── Date helpers ─────────────────────────────────────────────
-function today() {
-  const d = new Date();
-  d.setHours(0,0,0,0);
-  return d;
-}
-
-function parseDate(str) {
-  const [y,m,d] = str.split('-').map(Number);
-  return new Date(y, m-1, d);
-}
-
-function formatDate(d) {
-  return d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
-}
-
-function diffDays(a, b) {
-  return Math.round((b - a) / 86400000);
-}
-
-function addDays(d, n) {
-  const r = new Date(d);
-  r.setDate(r.getDate() + n);
-  return r;
-}
-
-// ─── Render ───────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────
 function render() {
-  const roster = load();
-  const el = document.getElementById('main-content');
+  var roster = load();
+  var el = document.getElementById('main-content');
 
   if (!roster) {
-    el.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">⛏️</div>
-        <div class="empty-title">Set up your roster</div>
-        <div class="empty-sub">Enter your swing start date and roster pattern to start counting down.</div>
-        <button class="cta-btn" onclick="openPanel()">Enter Roster Details</button>
-      </div>`;
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⛏️</div><div class="empty-title">Set up your roster</div><div class="empty-sub">Enter your swing start date and roster pattern to start counting down.</div><button class="cta-btn" onclick="openPanel()">Enter Roster Details</button></div>';
     return;
   }
 
-  const start   = parseDate(roster.startDate);
-  const daysOn  = parseInt(roster.daysOn,  10);
-  const daysOff = parseInt(roster.daysOff, 10);
-  const now     = today();
-  const dayOfRoster = diffDays(start, now) + 1;
+  var start      = parseDate(roster.startDate);
+  var daysOn     = parseInt(roster.daysOn,  10);
+  var daysOff    = parseInt(roster.daysOff, 10);
+  var now        = today();
+  var dayOfRoster = diffDays(start, now) + 1;
+  var cycleLen   = daysOn + daysOff;
+  var elapsed    = diffDays(start, now);
+  var cycles     = elapsed >= 0 ? Math.floor(elapsed / cycleLen) : 0;
+  var curCycleStart = addDays(start, cycles * cycleLen);
+  var curFlyHome    = addDays(curCycleStart, daysOn);
+  var curCycleOffEnd = addDays(curCycleStart, cycleLen);
 
-  // Off swing scenario
-  const nextSwingStart = (() => {
-    const cycleLen = daysOn + daysOff;
-    const elapsed  = diffDays(start, now);
-    if (elapsed < 0) return null;
-    const cycles   = Math.floor(elapsed / cycleLen);
-    const curCycleStart  = addDays(start, cycles * cycleLen);
-    const curCycleOnEnd  = addDays(curCycleStart, daysOn);
-    const curCycleOffEnd = addDays(curCycleStart, cycleLen);
-    if (now < curCycleOnEnd) {
-      return null;
-    } else {
-      return curCycleOffEnd;
-    }
-  })();
+  var isOnSwing = (elapsed >= 0) && (now < curFlyHome);
+  var nextSwingStart = isOnSwing ? null : curCycleOffEnd;
 
-  const isOnSwing = nextSwingStart === null && dayOfRoster >= 1;
+  var actualDayOfSwing = Math.max(1, Math.min(daysOn, diffDays(curCycleStart, now) + 1));
+  var actualDaysLeft   = Math.max(0, diffDays(now, curFlyHome));
+  var offDaysGone      = isOnSwing ? 0 : diffDays(curFlyHome, now);
+  var offDaysLeft      = isOnSwing ? daysOff : Math.max(0, daysOff - offDaysGone);
 
-  // Current cycle context
-  const cycleLen    = daysOn + daysOff;
-  const elapsed     = diffDays(start, now);
-  const cycles      = elapsed >= 0 ? Math.floor(elapsed / cycleLen) : 0;
-  const curCycleStart = addDays(start, cycles * cycleLen);
-  const curFlyHome    = addDays(curCycleStart, daysOn);
-  const actualDayOfSwing = Math.max(1, Math.min(daysOn, diffDays(curCycleStart, now) + 1));
-  const actualDaysLeft   = Math.max(0, diffDays(now, curFlyHome));
-  const offDaysGone      = isOnSwing ? 0 : diffDays(curFlyHome, now);
-  const offDaysLeft      = isOnSwing ? daysOff : Math.max(0, daysOff - offDaysGone);
-
-  const pct = isOnSwing
+  var pct = isOnSwing
     ? Math.min(100, Math.round(((daysOn - actualDaysLeft) / daysOn) * 100))
     : Math.min(100, Math.round((offDaysGone / daysOff) * 100));
 
-  const heroNum  = isOnSwing ? actualDaysLeft : offDaysLeft;
-  const heroClass = isOnSwing
-    ? (actualDaysLeft <= 2 ? 'danger' : actualDaysLeft === 0 ? 'done' : '')
-    : 'ok';
+  var heroNum   = isOnSwing ? actualDaysLeft : offDaysLeft;
+  var heroClass = isOnSwing ? (actualDaysLeft <= 2 ? 'danger' : '') : 'ok';
 
-  let html = '';
-
-  html += `
-    <div class="hero">
-      <div class="hero-label">${isOnSwing ? 'Days left on swing' : 'Days left at home'}</div>
-      <div class="hero-number ${heroClass}">${heroNum}</div>
-      <div class="hero-unit">${heroNum === 1 ? 'day' : 'days'}</div>
-      <div class="hero-sub">
-        ${isOnSwing
-          ? `Fly home <strong>${actualDaysLeft === 0 ? 'today! ✈️' : formatDate(curFlyHome)}</strong>`
-          : `Back on site <strong>${formatDate(nextSwingStart || curFlyHome)}</strong>`
-        }
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-fill ${isOnSwing ? '' : 'done'}" style="width:${pct}%"></div>
-      </div>
-      <div class="progress-label">
-        <span>${isOnSwing ? 'Day 1' : 'Fly-home'}</span>
-        <span>${pct}%</span>
-        <span>${isOnSwing ? `Day ${daysOn}` : 'Back on site'}</span>
-      </div>
-    </div>`;
-
-  html += `<div class="stat-grid">`;
+  var html = '<div class="hero">'
+    + '<div class="hero-label">' + (isOnSwing ? 'Days left on swing' : 'Days left at home') + '</div>'
+    + '<div class="hero-number ' + heroClass + '">' + heroNum + '</div>'
+    + '<div class="hero-unit">' + (heroNum === 1 ? 'day' : 'days') + '</div>'
+    + '<div class="hero-sub">' + (isOnSwing
+        ? 'Fly home <strong>' + (actualDaysLeft === 0 ? 'today! ✈️' : formatDate(curFlyHome)) + '</strong>'
+        : 'Back on site <strong>' + formatDate(nextSwingStart || curFlyHome) + '</strong>')
+    + '</div>'
+    + '<div class="progress-wrap"><div class="progress-fill ' + (isOnSwing ? '' : 'done') + '" style="width:' + pct + '%"></div></div>'
+    + '<div class="progress-label"><span>' + (isOnSwing ? 'Day 1' : 'Fly-home') + '</span><span>' + pct + '%</span><span>' + (isOnSwing ? 'Day ' + daysOn : 'Back on site') + '</span></div>'
+    + '</div>'
+    + '<div class="stat-grid">';
 
   if (isOnSwing) {
-    html += `
-      <div class="stat-card">
-        <div class="stat-label">Swing Day</div>
-        <div class="stat-value accent">${actualDayOfSwing} <span style="font-size:14px;color:var(--muted)">/ ${daysOn}</span></div>
-        <div class="stat-sub">of ${daysOn} days on</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Days Left</div>
-        <div class="stat-value ${actualDaysLeft <= 2 ? 'danger' : ''}">${actualDaysLeft}</div>
-        <div class="stat-sub">until fly-home</div>
-      </div>
-      <div class="stat-card wide">
-        <div class="stat-label">Fly-home Date</div>
-        <div class="stat-value" style="font-size:20px">${formatDate(curFlyHome)} ✈️</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Days Off</div>
-        <div class="stat-value ok">${daysOff}</div>
-        <div class="stat-sub">when you get home</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Back on Site</div>
-        <div class="stat-value" style="font-size:18px">${formatDate(addDays(curFlyHome, daysOff))}</div>
-      </div>`;
+    html += '<div class="stat-card"><div class="stat-label">Swing Day</div><div class="stat-value accent">' + actualDayOfSwing + ' <span style="font-size:14px;color:var(--muted)">/ ' + daysOn + '</span></div><div class="stat-sub">of ' + daysOn + ' days on</div></div>'
+      + '<div class="stat-card"><div class="stat-label">Days Left</div><div class="stat-value ' + (actualDaysLeft <= 2 ? 'danger' : '') + '">' + actualDaysLeft + '</div><div class="stat-sub">until fly-home</div></div>'
+      + '<div class="stat-card wide"><div class="stat-label">Fly-home Date</div><div class="stat-value" style="font-size:20px">' + formatDate(curFlyHome) + ' ✈️</div></div>'
+      + '<div class="stat-card"><div class="stat-label">Days Off</div><div class="stat-value ok">' + daysOff + '</div><div class="stat-sub">when you get home</div></div>'
+      + '<div class="stat-card"><div class="stat-label">Back on Site</div><div class="stat-value" style="font-size:18px">' + formatDate(addDays(curFlyHome, daysOff)) + '</div></div>';
   } else {
-    html += `
-      <div class="stat-card wide">
-        <div class="stat-label">You're home! 🏠</div>
-        <div class="stat-value ok">${offDaysLeft}</div>
-        <div class="stat-sub">days off remaining</div>
-      </div>
-      <div class="stat-card wide">
-        <div class="stat-label">Back on site</div>
-        <div class="stat-value" style="font-size:20px">${formatDate(nextSwingStart)}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Days Off Gone</div>
-        <div class="stat-value">${offDaysGone}</div>
-        <div class="stat-sub">of ${daysOff}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Roster Pattern</div>
-        <div class="stat-value">${daysOn}/${daysOff}</div>
-        <div class="stat-sub">on / off</div>
-      </div>`;
+    html += '<div class="stat-card wide"><div class="stat-label">You\'re home! 🏠</div><div class="stat-value ok">' + offDaysLeft + '</div><div class="stat-sub">days off remaining</div></div>'
+      + '<div class="stat-card wide"><div class="stat-label">Back on site</div><div class="stat-value" style="font-size:20px">' + formatDate(nextSwingStart) + '</div></div>'
+      + '<div class="stat-card"><div class="stat-label">Days Off Gone</div><div class="stat-value">' + offDaysGone + '</div><div class="stat-sub">of ' + daysOff + '</div></div>'
+      + '<div class="stat-card"><div class="stat-label">Roster Pattern</div><div class="stat-value">' + daysOn + '/' + daysOff + '</div><div class="stat-sub">on / off</div></div>';
   }
 
-  html += `</div>`;
-
-  html += `
-    <div class="today-row">
-      <div class="today-dot"></div>
-      Today is ${formatDate(now)} &bull; ${roster.daysOn}/${roster.daysOff} roster
-    </div>`;
-
+  html += '</div><div class="today-row"><div class="today-dot"></div>Today is ' + formatDate(now) + ' &bull; ' + roster.daysOn + '/' + roster.daysOff + ' roster</div>';
   el.innerHTML = html;
 }
 
-// ─── Panel ────────────────────────────────────────────────────
+// ── Panel ─────────────────────────────────────────────────────
 function openPanel() {
-  const roster = load();
+  var roster = load();
   if (roster) {
     document.getElementById('startDate').value = roster.startDate;
     document.getElementById('daysOn').value    = roster.daysOn;
     document.getElementById('daysOff').value   = roster.daysOff;
   } else {
-    const d = new Date();
-    const pad = n => String(n).padStart(2,'0');
-    document.getElementById('startDate').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    var d = new Date();
+    var pad = function(n) { return String(n).padStart(2,'0'); };
+    document.getElementById('startDate').value = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
     document.getElementById('daysOn').value  = '14';
     document.getElementById('daysOff').value = '7';
   }
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-
 function closePanel() {
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
-
-function handleOverlayClick(e) {
-  if (e.target === document.getElementById('overlay')) closePanel();
-}
-
+function handleOverlayClick(e) { if (e.target === document.getElementById('overlay')) closePanel(); }
 function saveAndClose() {
-  const startDate = document.getElementById('startDate').value;
-  const daysOn    = parseInt(document.getElementById('daysOn').value, 10);
-  const daysOff   = parseInt(document.getElementById('daysOff').value, 10);
-
-  if (!startDate) { alert('Please enter your swing start date.'); return; }
-  if (!daysOn || daysOn < 1)  { alert('Days ON must be at least 1.'); return; }
-  if (!daysOff || daysOff < 1){ alert('Days OFF must be at least 1.'); return; }
-
-  save({ startDate, daysOn, daysOff });
-  closePanel();
-  render();
+  var startDate = document.getElementById('startDate').value;
+  var daysOn    = parseInt(document.getElementById('daysOn').value, 10);
+  var daysOff   = parseInt(document.getElementById('daysOff').value, 10);
+  if (!startDate)           { alert('Please enter your swing start date.'); return; }
+  if (!daysOn  || daysOn  < 1) { alert('Days ON must be at least 1.');  return; }
+  if (!daysOff || daysOff < 1) { alert('Days OFF must be at least 1.'); return; }
+  save({ startDate: startDate, daysOn: daysOn, daysOff: daysOff });
+  closePanel(); render();
 }
-
 function clearRoster() {
   if (confirm('Clear your roster details?')) {
-    localStorage.removeItem(STORAGE_KEY);
-    closePanel();
-    render();
+    localStorage.removeItem(STORAGE_KEY); closePanel(); render();
   }
 }
-
 function step(id, delta) {
-  const el  = document.getElementById(id);
-  const val = parseInt(el.value, 10) || 0;
-  const min = parseInt(el.min, 10) || 1;
-  const max = parseInt(el.max, 10) || 365;
-  el.value  = Math.max(min, Math.min(max, val + delta));
+  var el = document.getElementById(id);
+  var val = parseInt(el.value, 10) || 0;
+  el.value = Math.max(parseInt(el.min,10)||1, Math.min(parseInt(el.max,10)||365, val + delta));
 }
 
-// ─── Boot ─────────────────────────────────────────────────────
+// ── Boot ──────────────────────────────────────────────────────
 render();
-
-const msToMidnight = () => {
-  const now  = new Date();
-  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  return next - now;
+var msToMidnight = function() {
+  var now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate()+1) - now;
 };
-setTimeout(() => { render(); setInterval(render, 86400000); }, msToMidnight());
+setTimeout(function() { render(); setInterval(render, 86400000); }, msToMidnight());
 </script>
 </body>
 </html>

@@ -1,32 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<!-- Favicon (browser tab) -->
-<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/x-icon"    href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-
-<!-- iPhone / iPad Home Screen icon -->
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-
-<!-- Android / Chrome PWA manifest -->
 <link rel="manifest" href="manifest.json">
-
-<!-- iOS full-screen mode -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FIFO">
-
-<!-- Android theme colour -->
 <meta name="theme-color" content="#f5a623">
-
+<meta name="msapplication-TileColor" content="#0d0f12">
+<meta name="msapplication-TileImage" content="icon-192.png">
 <title>FIFO Countdown</title>
-
-
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -39,10 +27,14 @@
     --accent-dk: #c4831a;
     --danger:    #e05a4e;
     --ok:        #4caf50;
+    --spotify:   #1db954;
+    --spotify-dk:#17a349;
     --text:      #e8ecf0;
     --muted:     #7a8694;
     --mono:      'DM Mono', monospace;
     --sans:      'Inter', system-ui, sans-serif;
+    --radius:    18px;
+    --gap:       20px;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -55,528 +47,468 @@
     -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
   }
+  body { display: flex; flex-direction: column; min-height: 100dvh; }
 
-  body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100dvh;
-  }
-
-  /* ════════════════════════════════════════════════════════════
-     SPLASH SCREEN
-  ════════════════════════════════════════════════════════════ */
+  /* ─────────────────────────────────────────────────────────
+     SPLASH
+  ───────────────────────────────────────────────────────── */
   #splash {
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    background: #0d0f12;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    opacity: 1;
-    transition: opacity 0.55s ease;
-    pointer-events: all;
-    overflow: hidden;
+    position: fixed; inset: 0; z-index: 999; background: #0d0f12;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; opacity: 1; transition: opacity 0.55s ease;
+    pointer-events: all; overflow: hidden;
   }
-  #splash.fade-out {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Subtle grid lines in background */
+  #splash.fade-out { opacity: 0; pointer-events: none; }
   #splash::before {
-    content: '';
-    position: absolute;
-    inset: 0;
+    content: ''; position: absolute; inset: 0;
     background-image:
       linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
+    background-size: 40px 40px; pointer-events: none;
   }
-
-  /* Radial glow behind icon */
   #splash::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -60%);
-    width: 320px;
-    height: 320px;
+    content: ''; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-60%); width: 320px; height: 320px;
     background: radial-gradient(circle, rgba(245,166,35,0.08) 0%, transparent 70%);
     pointer-events: none;
   }
-
-  /* Corner accent brackets */
   .splash-corner {
-    position: absolute;
-    width: 28px;
-    height: 28px;
-    border-color: rgba(245,166,35,0.2);
-    border-style: solid;
+    position: absolute; width: 28px; height: 28px;
+    border-color: rgba(245,166,35,0.2); border-style: solid;
     animation: splashFadeIn 0.6s ease 0.1s both;
   }
-  .splash-corner.tl { top: 20px; left: 20px; border-width: 2px 0 0 2px; }
-  .splash-corner.tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; }
-  .splash-corner.bl { bottom: 20px; left: 20px; border-width: 0 0 2px 2px; }
-  .splash-corner.br { bottom: 20px; right: 20px; border-width: 0 2px 2px 0; }
-
-  /* Badge pill */
+  .splash-corner.tl { top:20px;  left:20px;  border-width:2px 0 0 2px; }
+  .splash-corner.tr { top:20px;  right:20px; border-width:2px 2px 0 0; }
+  .splash-corner.bl { bottom:20px; left:20px;  border-width:0 0 2px 2px; }
+  .splash-corner.br { bottom:20px; right:20px; border-width:0 2px 2px 0; }
   .splash-badge {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--accent-dk);
-    background: rgba(245,166,35,0.08);
-    border: 1px solid rgba(245,166,35,0.2);
-    border-radius: 99px;
-    padding: 5px 14px;
-    margin-bottom: 30px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em;
+    text-transform: uppercase; color: var(--accent-dk);
+    background: rgba(245,166,35,0.08); border: 1px solid rgba(245,166,35,0.2);
+    border-radius: 99px; padding: 5px 14px; margin-bottom: 30px;
     animation: splashFadeUp 0.5s ease 0.15s both;
   }
-
-  /* Main icon */
   .splash-icon {
-    font-size: 58px;
-    line-height: 1;
-    margin-bottom: 22px;
+    font-size: 58px; line-height: 1; margin-bottom: 22px;
     animation: splashFadeUp 0.5s ease 0.25s both, splashGlow 2s ease-in-out 0.8s infinite alternate;
-    position: relative;
-    z-index: 1;
+    position: relative; z-index: 1;
   }
-
-  /* App name */
   .splash-title {
-    font-family: var(--mono);
-    font-size: clamp(30px, 8.5vw, 42px);
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    color: var(--text);
-    line-height: 1;
-    animation: splashFadeUp 0.5s ease 0.35s both;
-    position: relative;
-    z-index: 1;
+    font-family: var(--mono); font-size: clamp(30px,8.5vw,42px); font-weight: 500;
+    letter-spacing: -0.02em; color: var(--text); line-height: 1;
+    animation: splashFadeUp 0.5s ease 0.35s both; position: relative; z-index: 1;
   }
   .splash-title .accent { color: var(--accent); }
-
-  /* Tagline */
   .splash-tagline {
-    font-family: var(--sans);
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-    margin-top: 10px;
-    animation: splashFadeUp 0.5s ease 0.45s both;
-    position: relative;
-    z-index: 1;
+    font-family: var(--sans); font-size: 14px; color: var(--muted);
+    letter-spacing: 0.05em; margin-top: 10px;
+    animation: splashFadeUp 0.5s ease 0.45s both; position: relative; z-index: 1;
   }
-
-  /* Loading bar */
   .splash-bar-wrap {
-    margin-top: 56px;
-    width: min(260px, 70vw);
-    height: 3px;
-    background: rgba(42,48,64,0.8);
-    border-radius: 99px;
-    overflow: hidden;
-    animation: splashFadeIn 0.4s ease 0.5s both;
-    position: relative;
-    z-index: 1;
+    margin-top: 56px; width: min(260px,70vw); height: 3px;
+    background: rgba(42,48,64,0.8); border-radius: 99px; overflow: hidden;
+    animation: splashFadeIn 0.4s ease 0.5s both; position: relative; z-index: 1;
   }
   .splash-bar-fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 99px;
+    height: 100%; width: 0%; border-radius: 99px;
     background: linear-gradient(90deg, var(--accent-dk), var(--accent), #ffc85a);
-    animation: splashLoad 1.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.55s forwards;
+    animation: splashLoad 1.7s cubic-bezier(0.25,0.46,0.45,0.94) 0.55s forwards;
     box-shadow: 0 0 8px rgba(245,166,35,0.5);
   }
-
-  /* "Loading" label */
   .splash-loading-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #3a4450;
-    margin-top: 10px;
-    animation: splashFadeIn 0.4s ease 0.65s both;
-    position: relative;
-    z-index: 1;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: #3a4450; margin-top: 10px;
+    animation: splashFadeIn 0.4s ease 0.65s both; position: relative; z-index: 1;
   }
-
-  @keyframes splashFadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes splashFadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  @keyframes splashLoad {
-    0%   { width: 0%; }
-    50%  { width: 70%; }
-    80%  { width: 90%; }
-    100% { width: 100%; }
-  }
+  @keyframes splashFadeUp  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes splashFadeIn  { from{opacity:0} to{opacity:1} }
+  @keyframes splashLoad    { 0%{width:0%} 50%{width:70%} 80%{width:90%} 100%{width:100%} }
   @keyframes splashGlow {
     from { filter: drop-shadow(0 0 10px rgba(245,166,35,0.2)); }
     to   { filter: drop-shadow(0 0 28px rgba(245,166,35,0.55)); }
   }
 
-  /* ════════════════════════════════════════════════════════════
+  /* ─────────────────────────────────────────────────────────
      APP WRAPPER
-  ════════════════════════════════════════════════════════════ */
-  #app-wrapper {
-    display: contents;
-    opacity: 0;
-    transition: opacity 0.45s ease;
-  }
-  #app-wrapper.visible {
-    opacity: 1;
-  }
+  ───────────────────────────────────────────────────────── */
+  #app-wrapper { display: contents; opacity: 0; transition: opacity 0.45s ease; }
+  #app-wrapper.visible { opacity: 1; }
 
-  /* ════════════════════════════════════════════════════════════
+  /* ─────────────────────────────────────────────────────────
      HEADER
-  ════════════════════════════════════════════════════════════ */
+  ───────────────────────────────────────────────────────── */
   header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px 14px;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    position: sticky; top: 0; z-index: 10;
   }
   .logo {
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent);
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
   }
   .logo span { color: var(--muted); }
   .settings-btn {
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 10px 18px;
-    font-family: var(--sans);
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-    min-height: 44px;
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    border-radius: 10px; padding: 11px 20px; font-family: var(--sans);
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s; min-height: 46px;
   }
   .settings-btn:active { background: var(--border); }
 
-  /* ════════════════════════════════════════════════════════════
-     MAIN
-  ════════════════════════════════════════════════════════════ */
+  /* ─────────────────────────────────────────────────────────
+     MAIN SCROLL AREA
+  ───────────────────────────────────────────────────────── */
   main {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 20px 16px 40px;
+    padding: 24px 16px 56px;   /* more top + more bottom breathing room */
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 24px;                  /* more space between every section */
   }
 
+  /* ─────────────────────────────────────────────────────────
+     EMPTY STATE
+  ───────────────────────────────────────────────────────── */
   .empty-state {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 40px 24px;
-    gap: 16px;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 48px 24px 32px; gap: 14px;
   }
-  .empty-icon { font-size: 56px; line-height: 1; }
+  .empty-icon  { font-size: 56px; line-height: 1; }
   .empty-title { font-size: 22px; font-weight: 700; }
-  .empty-sub { font-size: 16px; color: var(--muted); line-height: 1.5; }
+  .empty-sub   { font-size: 16px; color: var(--muted); line-height: 1.55; max-width: 280px; }
   .cta-btn {
-    margin-top: 8px;
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: 14px;
-    padding: 18px 36px;
-    font-family: var(--sans);
-    font-size: 17px;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 0.02em;
-    min-height: 56px;
+    margin-top: 8px; background: var(--accent); color: #000; border: none;
+    border-radius: 14px; padding: 18px 36px; font-family: var(--sans);
+    font-size: 17px; font-weight: 700; cursor: pointer; min-height: 56px;
     transition: background 0.15s, transform 0.1s;
   }
   .cta-btn:active { background: var(--accent-dk); transform: scale(0.98); }
 
+  /* ─────────────────────────────────────────────────────────
+     HERO COUNTDOWN
+  ───────────────────────────────────────────────────────── */
   .hero {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px 20px 24px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 22px; padding: 32px 24px 28px;
+    text-align: center; position: relative; overflow: hidden;
   }
   .hero::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
     background: linear-gradient(90deg, var(--accent-dk), var(--accent), var(--accent-dk));
   }
   .hero-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 4px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
   }
   .hero-number {
-    font-family: var(--mono);
-    font-size: clamp(72px, 22vw, 100px);
-    font-weight: 500;
-    line-height: 1;
-    color: var(--accent);
-    letter-spacing: -0.02em;
+    font-family: var(--mono); font-size: clamp(80px,24vw,108px);
+    font-weight: 500; line-height: 1; color: var(--accent); letter-spacing: -0.02em;
   }
   .hero-number.danger { color: var(--danger); }
   .hero-number.done   { color: var(--ok); }
   .hero-unit {
-    font-family: var(--mono);
-    font-size: 16px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-top: 2px;
+    font-family: var(--mono); font-size: 16px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin-top: 4px;
   }
-  .hero-sub { margin-top: 14px; font-size: 15px; color: var(--muted); }
+  .hero-sub { margin-top: 16px; font-size: 15px; color: var(--muted); line-height: 1.5; }
   .hero-sub strong { color: var(--text); font-weight: 600; }
 
   .progress-wrap {
-    margin-top: 18px;
-    background: var(--border);
-    border-radius: 99px;
-    height: 8px;
-    overflow: hidden;
+    margin-top: 22px; background: var(--border);
+    border-radius: 99px; height: 8px; overflow: hidden;
   }
   .progress-fill {
-    height: 100%;
-    border-radius: 99px;
+    height: 100%; border-radius: 99px;
     background: linear-gradient(90deg, var(--accent-dk), var(--accent));
-    transition: width 0.5s ease;
-    min-width: 4px;
+    transition: width 0.5s ease; min-width: 4px;
   }
   .progress-fill.done { background: var(--ok); }
   .progress-label {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
+    display: flex; justify-content: space-between; margin-top: 8px;
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
   }
 
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  /* ─────────────────────────────────────────────────────────
+     STAT GRID
+  ───────────────────────────────────────────────────────── */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px 14px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px 16px;   /* more internal padding */
   }
   .stat-card.wide { grid-column: 1 / -1; }
   .stat-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
   }
   .stat-value {
-    font-family: var(--mono);
-    font-size: 26px;
-    font-weight: 500;
-    color: var(--text);
-    letter-spacing: -0.01em;
-    line-height: 1.1;
+    font-family: var(--mono); font-size: 28px; font-weight: 500;
+    color: var(--text); letter-spacing: -0.01em; line-height: 1.1;
   }
   .stat-value.accent { color: var(--accent); }
   .stat-value.ok     { color: var(--ok); }
   .stat-value.danger { color: var(--danger); }
-  .stat-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .stat-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
+  /* Today row */
+  .today-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: var(--muted); padding: 4px 2px;
+  }
+  .today-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     FULL-SCREEN WAKE-UP ALERT
+  ───────────────────────────────────────────────────────── */
+  #alarm-alert {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: #0a0c0e; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; padding: 40px 28px;
+    animation: alarmPulse 1s ease-in-out infinite alternate;
+  }
+  #alarm-alert.active { display: flex; }
+  @keyframes alarmPulse {
+    from { background: #0a0c0e; }
+    to   { background: #1c0e00; }
+  }
+  .alarm-alert-icon {
+    font-size: 80px; line-height: 1; margin-bottom: 28px;
+    animation: alarmBounce 0.6s ease infinite alternate;
+  }
+  @keyframes alarmBounce {
+    from { transform: scale(1);    }
+    to   { transform: scale(1.14); }
+  }
+  .alarm-alert-title {
+    font-family: var(--mono); font-size: clamp(38px,10vw,58px); font-weight: 500;
+    color: var(--accent); letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 12px;
+  }
+  .alarm-alert-sub {
+    font-size: 18px; color: var(--muted); margin-bottom: 52px; line-height: 1.5;
+  }
+  .stop-alarm-btn {
+    background: var(--danger); color: #fff; border: none; border-radius: 20px;
+    padding: 24px 48px; font-family: var(--sans); font-size: 21px; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.04em; min-height: 72px; width: 100%;
+    max-width: 340px; box-shadow: 0 0 48px rgba(224,90,78,0.5);
+    transition: transform 0.1s;
+  }
+  .stop-alarm-btn:active { transform: scale(0.96); }
+  .alarm-alert-time {
+    font-family: var(--mono); font-size: 14px; color: var(--muted); margin-top: 28px;
+    line-height: 1.6;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     ROSTER SETTINGS OVERLAY
+  ───────────────────────────────────────────────────────── */
   .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 100;
-    align-items: flex-end;
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.72); z-index: 100; align-items: flex-end;
   }
   .overlay.open { display: flex; }
   .panel {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    border-radius: 24px 24px 0 0;
-    width: 100%;
-    max-height: 90dvh;
-    overflow-y: auto;
-    padding: 8px 0 40px;
-    animation: slideUp 0.25s ease;
+    background: var(--surface); border-top: 1px solid var(--border);
+    border-radius: 26px 26px 0 0; width: 100%; max-height: 92dvh;
+    overflow-y: auto; padding: 8px 0 48px; animation: slideUp 0.25s ease;
   }
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-  }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
   .panel-handle {
-    width: 40px;
-    height: 4px;
-    background: var(--border);
-    border-radius: 99px;
-    margin: 12px auto 20px;
+    width: 40px; height: 4px; background: var(--border);
+    border-radius: 99px; margin: 14px auto 22px;
   }
   .panel-title {
-    font-size: 20px;
-    font-weight: 700;
-    padding: 0 20px 20px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 20px;
+    font-size: 20px; font-weight: 700; padding: 0 22px 20px;
+    border-bottom: 1px solid var(--border); margin-bottom: 22px;
   }
-
-  .form-group { padding: 0 20px; margin-bottom: 20px; }
+  .form-group { padding: 0 22px; margin-bottom: 22px; }
   label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    margin-bottom: 8px;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    display: block; font-size: 12px; font-weight: 600; color: var(--muted);
+    margin-bottom: 10px; letter-spacing: 0.06em; text-transform: uppercase;
   }
-  input[type="date"],
-  input[type="number"] {
-    display: block;
-    width: 100%;
-    background: var(--card);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 20px;
-    padding: 16px 14px;
-    outline: none;
-    transition: border-color 0.15s;
-    min-height: 56px;
+  input[type="date"], input[type="number"] {
+    display: block; width: 100%; background: var(--card);
+    border: 1.5px solid var(--border); border-radius: 14px; color: var(--text);
+    font-family: var(--mono); font-size: 22px; padding: 16px 14px;
+    outline: none; transition: border-color 0.15s; min-height: 58px;
     -webkit-appearance: none;
   }
-  input[type="date"]:focus,
-  input[type="number"]:focus { border-color: var(--accent); }
-  input[type="number"] { -moz-appearance: textfield; }
-  input::-webkit-inner-spin-button,
-  input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type="date"]:focus, input[type="number"]:focus { border-color: var(--accent); }
+  input[type="number"]  { -moz-appearance: textfield; }
+  input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; }
 
   .stepper { display: flex; align-items: center; gap: 12px; }
   .stepper input { flex: 1; text-align: center; }
   .step-btn {
-    background: var(--card);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    border-radius: 12px;
-    width: 56px;
-    height: 56px;
-    font-size: 26px;
-    cursor: pointer;
-    flex-shrink: 0;
+    background: var(--card); border: 1.5px solid var(--border); color: var(--text);
+    border-radius: 14px; width: 58px; height: 58px; font-size: 28px; cursor: pointer;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     transition: background 0.1s, border-color 0.1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
   }
   .step-btn:active { background: var(--border); border-color: var(--accent); }
 
   .save-btn {
-    display: block;
-    width: calc(100% - 40px);
-    margin: 24px 20px 0;
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: 14px;
-    padding: 18px;
-    font-family: var(--sans);
-    font-size: 17px;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 0.02em;
-    min-height: 56px;
-    transition: background 0.15s, transform 0.1s;
+    display: block; width: calc(100% - 44px); margin: 26px 22px 0;
+    background: var(--accent); color: #000; border: none; border-radius: 14px;
+    padding: 19px; font-family: var(--sans); font-size: 17px; font-weight: 700;
+    cursor: pointer; min-height: 58px; transition: background 0.15s, transform 0.1s;
   }
   .save-btn:active { background: var(--accent-dk); transform: scale(0.98); }
 
   .clear-btn {
-    display: block;
-    width: calc(100% - 40px);
-    margin: 12px 20px 0;
-    background: transparent;
-    color: var(--danger);
-    border: 1.5px solid var(--danger);
-    border-radius: 14px;
-    padding: 16px;
-    font-family: var(--sans);
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    min-height: 52px;
-    transition: background 0.15s;
+    display: block; width: calc(100% - 44px); margin: 14px 22px 0;
+    background: transparent; color: var(--danger); border: 1.5px solid var(--danger);
+    border-radius: 14px; padding: 16px; font-family: var(--sans); font-size: 16px;
+    font-weight: 600; cursor: pointer; min-height: 54px; transition: background 0.15s;
   }
-  .clear-btn:active { background: rgba(224,90,78,0.12); }
+  .clear-btn:active { background: rgba(224,90,78,0.1); }
 
-  .divider { height: 1px; background: var(--border); margin: 4px 20px 20px; }
-  .section-head {
+  .p-divider      { height: 1px; background: var(--border); margin: 6px 22px 22px; }
+  .p-section-head {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted); padding: 0 22px 12px;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     SETTINGS PANEL — ALARM + SPOTIFY SECTIONS
+  ───────────────────────────────────────────────────────── */
+  .panel-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 22px; margin-bottom: 18px;
+  }
+  .panel-row-label { font-size: 15px; font-weight: 600; color: var(--text); }
+  .panel-row-sub   { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .toggle-status {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em;
+    color: var(--muted); min-width: 28px; text-align: right;
+  }
+  .toggle-status.on { color: var(--accent); }
+  .toggle { position: relative; width: 54px; height: 30px; flex-shrink: 0; cursor: pointer; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute; inset: 0; background: var(--border);
+    border-radius: 99px; transition: background 0.2s;
+  }
+  .toggle input:checked + .toggle-track { background: var(--accent); }
+  .toggle-thumb {
+    position: absolute; top: 4px; left: 4px; width: 22px; height: 22px;
+    background: #fff; border-radius: 50%; transition: transform 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4); pointer-events: none;
+  }
+  .toggle input:checked ~ .toggle-thumb { transform: translateX(24px); }
+  .toggle-inline { display: flex; align-items: center; gap: 10px; }
+
+  .time-input {
+    width: 100%; background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 14px; color: var(--text); font-family: var(--mono);
+    font-size: 24px; padding: 16px; outline: none;
+    transition: border-color 0.15s; min-height: 58px;
+    -webkit-appearance: none; text-align: center;
+  }
+  .time-input:focus { border-color: var(--accent); }
+
+  /* Snooze pill selector */
+  .snooze-pills { display: flex; gap: 10px; }
+  .snooze-pill {
+    flex: 1; background: var(--card); border: 1.5px solid var(--border);
+    color: var(--muted); border-radius: 12px; padding: 14px 8px;
+    font-family: var(--sans); font-size: 14px; font-weight: 600;
+    cursor: pointer; text-align: center; min-height: 50px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .snooze-pill.active {
+    background: rgba(245,166,35,0.12); border-color: var(--accent); color: var(--accent);
+  }
+
+  /* Spotify input + buttons inside panel */
+  .spotify-url-input {
+    width: 100%; background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 14px; color: var(--text); font-family: var(--mono);
+    font-size: 14px; padding: 16px; outline: none;
+    transition: border-color 0.15s; min-height: 54px; line-height: 1.4;
+  }
+  .spotify-url-input:focus { border-color: var(--spotify); }
+  .spotify-url-input::placeholder { color: var(--muted); }
+
+  .spotify-test-btn {
+    width: 100%; background: transparent; color: var(--spotify);
+    border: 1.5px solid var(--spotify); border-radius: 14px; padding: 15px;
+    font-family: var(--sans); font-size: 15px; font-weight: 600;
+    cursor: pointer; min-height: 52px; transition: background 0.15s;
+  }
+  .spotify-test-btn:active { background: rgba(29,185,84,0.1); }
+
+  .spotify-status {
+    font-size: 13px; color: var(--muted); text-align: center;
+    font-family: var(--mono); letter-spacing: 0.04em; min-height: 20px; margin-top: 4px;
+  }
+  .spotify-status.ok  { color: var(--spotify); }
+  .spotify-status.err { color: var(--danger); }
+
+  /* Save confirmation pulse for alarm/spotify saves inside settings */
+  .panel-save-btn {
+    display: block; width: calc(100% - 44px); margin: 4px 22px 0;
+    background: var(--accent); color: #000; border: none; border-radius: 14px;
+    padding: 17px; font-family: var(--sans); font-size: 16px; font-weight: 700;
+    cursor: pointer; min-height: 54px; transition: background 0.15s, transform 0.1s;
+  }
+  .panel-save-btn:active { background: var(--accent-dk); transform: scale(0.98); }
+  .panel-save-btn.spotify-save {
+    background: var(--spotify); color: #000;
+  }
+  .panel-save-btn.spotify-save:active { background: var(--spotify-dk); }
+
+  /* ─────────────────────────────────────────────────────────
+     MAIN SCREEN — small alarm status line
+  ───────────────────────────────────────────────────────── */
+  .alarm-status-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; color: var(--muted); padding: 0 2px;
     font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 0 20px 12px;
+  }
+  .alarm-status-row .alarm-status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(245,166,35,0.6);
   }
 
-  .today-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--muted);
-    padding: 0 2px;
+  /* ─────────────────────────────────────────────────────────
+     WAKE-UP ALERT — 3-button layout
+  ───────────────────────────────────────────────────────── */
+  .alarm-alert-btns {
+    display: flex; flex-direction: column; gap: 14px;
+    width: 100%; max-width: 340px;
   }
-  .today-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    flex-shrink: 0;
+  .snooze-alarm-btn {
+    background: var(--card); color: var(--accent); border: 1.5px solid var(--accent);
+    border-radius: 20px; padding: 20px; font-family: var(--sans); font-size: 18px;
+    font-weight: 700; cursor: pointer; letter-spacing: 0.02em; min-height: 62px;
+    width: 100%; transition: background 0.15s, transform 0.1s;
   }
+  .snooze-alarm-btn:active { background: rgba(245,166,35,0.1); transform: scale(0.96); }
+  .alarm-spotify-btn {
+    background: var(--spotify); color: #000; border: none;
+    border-radius: 20px; padding: 20px; font-family: var(--sans); font-size: 18px;
+    font-weight: 700; cursor: pointer; letter-spacing: 0.02em; min-height: 62px;
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .alarm-spotify-btn:active { background: var(--spotify-dk); transform: scale(0.96); }
 
   .hidden { display: none !important; }
 </style>
 </head>
 <body>
 
-<!-- SPLASH SCREEN -->
+<!-- ══ SPLASH ══════════════════════════════════════════════ -->
 <div id="splash" aria-hidden="true">
   <div class="splash-corner tl"></div>
   <div class="splash-corner tr"></div>
@@ -586,36 +518,50 @@
   <div class="splash-icon">⛏️</div>
   <div class="splash-title">FIFO <span class="accent">Countdown</span></div>
   <div class="splash-tagline">Counting down to R&amp;R</div>
-  <div class="splash-bar-wrap">
-    <div class="splash-bar-fill"></div>
-  </div>
+  <div class="splash-bar-wrap"><div class="splash-bar-fill"></div></div>
   <div class="splash-loading-label">Loading&hellip;</div>
 </div>
 
-<!-- APP -->
+<!-- ══ WAKE-UP ALERT ═══════════════════════════════════════ -->
+<div id="alarm-alert" role="alertdialog" aria-modal="true">
+  <div class="alarm-alert-icon">⏰</div>
+  <div class="alarm-alert-title">Wake up<br>legend</div>
+  <div class="alarm-alert-sub">Time to get moving mate</div>
+  <div class="alarm-alert-btns">
+    <button class="stop-alarm-btn" onclick="stopAlarm()">🛑 &nbsp;STOP ALARM</button>
+    <button class="snooze-alarm-btn" onclick="snoozeAlarm()">😴 &nbsp;Snooze</button>
+    <button class="alarm-spotify-btn" onclick="openSpotify()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.623.623 0 01-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 01-.277-1.215c3.809-.87 7.076-.496 9.712 1.115a.623.623 0 01.207.857zm1.223-2.722a.78.78 0 01-1.072.257c-2.687-1.652-6.785-2.131-9.965-1.166a.78.78 0 01-.973-.519.781.781 0 01.519-.972c3.632-1.102 8.147-.568 11.234 1.328a.78.78 0 01.257 1.072zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71a.937.937 0 11-.543-1.794c3.532-1.072 9.404-.865 13.115 1.338a.937.937 0 01-.955 1.613z"/>
+      </svg>
+      Open Spotify
+    </button>
+  </div>
+  <div class="alarm-alert-time" id="alarm-alert-time"></div>
+</div>
+
+<!-- ══ APP ═════════════════════════════════════════════════ -->
 <div id="app-wrapper">
 
 <header>
   <div class="logo">FIFO <span>// Countdown</span></div>
-  <button class="settings-btn" onclick="openPanel()">⚙ Roster</button>
+  <button class="settings-btn" onclick="openPanel()">⚙&nbsp; Roster</button>
 </header>
 
 <main id="main-content"></main>
 
+<!-- Roster panel -->
 <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
-  <div class="panel" id="panel">
+  <div class="panel">
     <div class="panel-handle"></div>
     <div class="panel-title">My Roster</div>
-
-    <div class="section-head">Swing Start Date</div>
+    <div class="p-section-head">Swing Start Date</div>
     <div class="form-group">
       <label for="startDate">First day on site</label>
       <input type="date" id="startDate">
     </div>
-
-    <div class="divider"></div>
-    <div class="section-head">Roster Pattern</div>
-
+    <div class="p-divider"></div>
+    <div class="p-section-head">Roster Pattern</div>
     <div class="form-group">
       <label for="daysOn">Days ON</label>
       <div class="stepper">
@@ -624,7 +570,6 @@
         <button class="step-btn" onclick="step('daysOn',1)">+</button>
       </div>
     </div>
-
     <div class="form-group">
       <label for="daysOff">Days OFF</label>
       <div class="stepper">
@@ -633,160 +578,462 @@
         <button class="step-btn" onclick="step('daysOff',1)">+</button>
       </div>
     </div>
-
     <button class="save-btn" onclick="saveAndClose()">Save Roster</button>
     <button class="clear-btn" onclick="clearRoster()">Clear Roster</button>
+
+    <div class="p-divider" style="margin-top:30px;"></div>
+    <div class="p-section-head">⏰ Wake-Up Alarm</div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Alarm</div>
+        <div class="panel-row-sub" id="alarm-toggle-sub">Off</div>
+      </div>
+      <div class="toggle-inline">
+        <span class="toggle-status" id="alarm-toggle-label">OFF</span>
+        <label class="toggle">
+          <input type="checkbox" id="alarm-toggle" onchange="toggleAlarm(this.checked)">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="alarm-time-input">Wake-up time</label>
+      <input type="time" class="time-input" id="alarm-time-input" value="06:00">
+    </div>
+
+    <div class="form-group">
+      <label>Snooze duration</label>
+      <div class="snooze-pills" id="snooze-pills">
+        <button type="button" class="snooze-pill" data-min="5"  onclick="selectSnooze(5)">5 min</button>
+        <button type="button" class="snooze-pill" data-min="10" onclick="selectSnooze(10)">10 min</button>
+        <button type="button" class="snooze-pill" data-min="15" onclick="selectSnooze(15)">15 min</button>
+      </div>
+    </div>
+
+    <button class="panel-save-btn" onclick="saveAlarmSettings()">Save Alarm</button>
+
+    <div class="p-divider" style="margin-top:30px;"></div>
+    <div class="p-section-head">🎵 Spotify</div>
+
+    <div class="form-group" style="margin-bottom:14px;">
+      <label for="spotify-url-input">Playlist, album, or track link</label>
+      <input type="url" class="spotify-url-input" id="spotify-url-input"
+        placeholder="https://open.spotify.com/playlist/…" oninput="clearSpotifyStatus()">
+    </div>
+
+    <div class="form-group" style="margin-bottom:14px;">
+      <button class="spotify-test-btn" onclick="testSpotify()">🔍 Test Spotify Link</button>
+    </div>
+
+    <button class="panel-save-btn spotify-save" onclick="saveSpotifyUrl()">💾 Save Spotify Link</button>
+    <div class="spotify-status" id="spotify-status" style="padding:0 22px;margin-top:10px;"></div>
   </div>
 </div>
 
 </div><!-- #app-wrapper -->
 
 <script>
-// ── Splash ────────────────────────────────────────────────────
-(function () {
-  var SPLASH_DURATION = 2300;
-  var FADE_DURATION   = 550;
+/* ── SPLASH ──────────────────────────────────────────────── */
+(function(){
   var splash  = document.getElementById('splash');
   var appWrap = document.getElementById('app-wrapper');
-  setTimeout(function () {
+  setTimeout(function(){
     splash.classList.add('fade-out');
     appWrap.classList.add('visible');
-    setTimeout(function () { splash.style.display = 'none'; }, FADE_DURATION + 50);
-  }, SPLASH_DURATION);
+    setTimeout(function(){ splash.style.display='none'; }, 650);
+  }, 2300);
 })();
 
-// ── Storage ───────────────────────────────────────────────────
-var STORAGE_KEY = 'fifo_roster_v1';
-function load() {
-  try { var r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; }
-  catch(e) { return null; }
+/* ── STORAGE ─────────────────────────────────────────────── */
+var ROSTER_KEY  = 'fifo_roster_v1';
+var ALARM_KEY   = 'fifo_alarm_v1';
+var SPOTIFY_KEY = 'fifo_spotify_v1';
+
+function loadRoster(){
+  try{ var r=localStorage.getItem(ROSTER_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
 }
-function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+function saveRoster(d){ localStorage.setItem(ROSTER_KEY,JSON.stringify(d)); }
 
-// ── Date helpers ──────────────────────────────────────────────
-function today() { var d = new Date(); d.setHours(0,0,0,0); return d; }
-function parseDate(str) { var p = str.split('-').map(Number); return new Date(p[0], p[1]-1, p[2]); }
-function formatDate(d) { return d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric' }); }
-function diffDays(a, b) { return Math.round((b - a) / 86400000); }
-function addDays(d, n) { var r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function loadAlarm(){
+  try{ var r=localStorage.getItem(ALARM_KEY); return r?JSON.parse(r):{time:'06:00',on:false,snooze:10}; }
+  catch(e){ return {time:'06:00',on:false,snooze:10}; }
+}
+function saveAlarm(d){ localStorage.setItem(ALARM_KEY,JSON.stringify(d)); }
 
-// ── Render ────────────────────────────────────────────────────
-function render() {
-  var roster = load();
-  var el = document.getElementById('main-content');
+function loadSpotify(){
+  try{ var r=localStorage.getItem(SPOTIFY_KEY); return r?JSON.parse(r):{url:''}; }
+  catch(e){ return {url:''}; }
+}
+function saveSpotify(d){ localStorage.setItem(SPOTIFY_KEY,JSON.stringify(d)); }
 
-  if (!roster) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⛏️</div><div class="empty-title">Set up your roster</div><div class="empty-sub">Enter your swing start date and roster pattern to start counting down.</div><button class="cta-btn" onclick="openPanel()">Enter Roster Details</button></div>';
+/* ── DATE HELPERS ────────────────────────────────────────── */
+function today(){ var d=new Date(); d.setHours(0,0,0,0); return d; }
+function parseDate(s){ var p=s.split('-').map(Number); return new Date(p[0],p[1]-1,p[2]); }
+function formatDate(d){ return d.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'}); }
+function diffDays(a,b){ return Math.round((b-a)/86400000); }
+function addDays(d,n){ var r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function fmt12(t){
+  if(!t) return '--:--';
+  var p=t.split(':'), h=parseInt(p[0],10), m=p[1], ap=h>=12?'PM':'AM';
+  h=h%12||12; return h+':'+m+' '+ap;
+}
+
+/* ── ALARM AUDIO ─────────────────────────────────────────── */
+var audioCtx=null, alarmBeepLoop=null;
+
+function getAudioCtx(){
+  if(!audioCtx){ try{ audioCtx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  return audioCtx;
+}
+function beep(freq,dur,vol){
+  var ctx=getAudioCtx(); if(!ctx) return;
+  try{
+    var o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type='square'; o.frequency.setValueAtTime(freq,ctx.currentTime);
+    g.gain.setValueAtTime(vol||0.3,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.start(ctx.currentTime); o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playAlarmPattern(){
+  beep(880,0.12,0.4);
+  setTimeout(function(){ beep(880,0.12,0.4); },160);
+  setTimeout(function(){ beep(1100,0.25,0.45); },320);
+}
+function startAlarmSound(){ stopAlarmSound(); playAlarmPattern(); alarmBeepLoop=setInterval(playAlarmPattern,1200); }
+function stopAlarmSound(){ if(alarmBeepLoop){ clearInterval(alarmBeepLoop); alarmBeepLoop=null; } }
+
+/* ── ALARM TRIGGER / STOP / SNOOZE ───────────────────────── */
+var alarmFired   = false;
+var snoozeTimer  = null;
+var snoozeUntilTs = null; // epoch ms when a snoozed alarm should re-fire
+
+function triggerAlarm(){
+  if(alarmFired) return; alarmFired=true;
+  var now=new Date(), alert=document.getElementById('alarm-alert');
+  document.getElementById('alarm-alert-time').textContent=
+    'Alarm set for '+fmt12(loadAlarm().time)+' — '+now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
+  alert.classList.add('active');
+  document.body.style.overflow='hidden';
+  var ctx=getAudioCtx();
+  if(ctx&&ctx.state==='suspended'){ ctx.resume().then(startAlarmSound); } else { startAlarmSound(); }
+}
+function stopAlarm(){
+  stopAlarmSound();
+  document.getElementById('alarm-alert').classList.remove('active');
+  document.body.style.overflow='';
+  alarmFired=false;
+  snoozeUntilTs=null;
+  if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
+}
+function snoozeAlarm(){
+  // Stop current alert/sound but remember to re-fire after snooze duration
+  stopAlarmSound();
+  document.getElementById('alarm-alert').classList.remove('active');
+  document.body.style.overflow='';
+  alarmFired=false;
+
+  var alarm=loadAlarm();
+  var mins=parseInt(alarm.snooze,10)||10;
+  snoozeUntilTs=Date.now()+(mins*60000);
+
+  if(snoozeTimer) clearTimeout(snoozeTimer);
+  snoozeTimer=setTimeout(function(){
+    snoozeUntilTs=null;
+    triggerAlarm();
+  }, mins*60000);
+}
+function checkAlarm(){
+  // Snoozed alarm takes priority — handled by its own setTimeout, nothing to poll here
+  if(snoozeUntilTs) return;
+  var alarm=loadAlarm(); if(!alarm.on||!alarm.time) return;
+  var now=new Date();
+  var nowT=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  if(nowT===alarm.time&&!alarmFired) triggerAlarm();
+  if(nowT!==alarm.time&&alarmFired&&!document.getElementById('alarm-alert').classList.contains('active')) alarmFired=false;
+}
+setInterval(checkAlarm,10000);
+
+/* ── ALARM SETTINGS (lives inside Settings panel) ────────── */
+function populateAlarmSettings(){
+  var alarm=loadAlarm();
+  var toggle=document.getElementById('alarm-toggle');
+  var lbl=document.getElementById('alarm-toggle-label');
+  var sub=document.getElementById('alarm-toggle-sub');
+  var timeInput=document.getElementById('alarm-time-input');
+  if(!toggle) return; // panel not open yet
+
+  toggle.checked=!!alarm.on;
+  lbl.textContent=alarm.on?'ON':'OFF';
+  lbl.className='toggle-status'+(alarm.on?' on':'');
+  sub.textContent=alarm.on?('Rings at '+fmt12(alarm.time)+' daily'):'Off';
+  timeInput.value=alarm.time||'06:00';
+
+  var mins=parseInt(alarm.snooze,10)||10;
+  document.querySelectorAll('.snooze-pill').forEach(function(p){
+    p.classList.toggle('active', parseInt(p.dataset.min,10)===mins);
+  });
+}
+
+function toggleAlarm(on){
+  var alarm=loadAlarm(); alarm.on=on; saveAlarm(alarm);
+  var lbl=document.getElementById('alarm-toggle-label');
+  var sub=document.getElementById('alarm-toggle-sub');
+  lbl.textContent=on?'ON':'OFF'; lbl.className='toggle-status'+(on?' on':'');
+  sub.textContent=on?('Rings at '+fmt12(alarm.time)+' daily'):'Off';
+  if(!on){ alarmFired=false; snoozeUntilTs=null; if(snoozeTimer){clearTimeout(snoozeTimer);snoozeTimer=null;} }
+  renderAlarmStatus();
+}
+
+function selectSnooze(mins){
+  document.querySelectorAll('.snooze-pill').forEach(function(p){
+    p.classList.toggle('active', parseInt(p.dataset.min,10)===mins);
+  });
+  var alarm=loadAlarm(); alarm.snooze=mins; saveAlarm(alarm);
+}
+
+function saveAlarmSettings(){
+  var t=document.getElementById('alarm-time-input').value;
+  if(!t){ alert('Please pick a wake-up time.'); return; }
+  var alarm=loadAlarm();
+  alarm.time=t;
+  alarm.on=document.getElementById('alarm-toggle').checked;
+  var activePill=document.querySelector('.snooze-pill.active');
+  alarm.snooze=activePill?parseInt(activePill.dataset.min,10):(alarm.snooze||10);
+  saveAlarm(alarm);
+  alarmFired=false; snoozeUntilTs=null;
+  if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
+  document.getElementById('alarm-toggle-sub').textContent=alarm.on?('Rings at '+fmt12(t)+' daily'):'Off';
+  beep(660,0.1,0.25); setTimeout(function(){ beep(880,0.15,0.3); },120);
+  renderAlarmStatus();
+}
+
+/* Small status line shown only on the main screen when alarm is ON */
+function renderAlarmStatus(){
+  var el=document.getElementById('alarm-status-line');
+  if(!el) return;
+  var alarm=loadAlarm();
+  if(alarm.on && alarm.time){
+    el.innerHTML='<div class="alarm-status-dot"></div>Alarm set: '+fmt12(alarm.time)+' &middot; Snooze: '+(alarm.snooze||10)+' min';
+    el.classList.remove('hidden');
+  } else {
+    el.innerHTML=''; el.classList.add('hidden');
+  }
+}
+
+/* ── SPOTIFY SETTINGS (lives inside Settings panel) ──────── */
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function populateSpotifySettings(){
+  var sp=loadSpotify();
+  var input=document.getElementById('spotify-url-input');
+  if(input) input.value=sp.url||'';
+  // keep plain key in sync for openSpotifyLink()
+  if(sp.url && !localStorage.getItem('spotifyLink')){
+    localStorage.setItem('spotifyLink', sp.url);
+  }
+  var s=document.getElementById('spotify-status');
+  if(s){ s.textContent=''; s.className='spotify-status'; }
+}
+
+function clearSpotifyStatus(){
+  var s=document.getElementById('spotify-status');
+  if(s){ s.textContent=''; s.className='spotify-status'; }
+}
+
+function saveSpotifyUrl(){
+  var input=document.getElementById('spotify-url-input');
+  var url=(input?input.value:'').trim();
+  saveSpotify({url:url});
+  // keep plain localStorage key in sync too, since openSpotifyLink() reads from it directly
+  localStorage.setItem('spotifyLink', url);
+  var s=document.getElementById('spotify-status');
+  if(s){
+    s.textContent=url?'✓ Saved':'Cleared'; s.className=url?'spotify-status ok':'spotify-status';
+    setTimeout(function(){ s.textContent=''; s.className='spotify-status'; },2500);
+  }
+}
+
+/* ── SPOTIFY DEEP LINK OPEN (exact behaviour requested) ──── */
+function openSpotifyLink(){
+  // Pull from whatever is currently typed in Settings first, else fall back to saved value
+  var input   = document.getElementById('spotify-url-input');
+  var typed   = (input ? input.value : '').trim();
+  var savedUrl = typed || localStorage.getItem('spotifyLink') || (loadSpotify().url || '');
+  var webUrl  = savedUrl.trim() || 'https://open.spotify.com';
+
+  var appUrl = 'spotify://';
+
+  var match = webUrl.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+
+  if (match) {
+    var type = match[1];
+    var id   = match[2];
+    appUrl = 'spotify:' + type + ':' + id;
+  }
+
+  var s = document.getElementById('spotify-status');
+  if(s){ s.textContent='Opening Spotify…'; s.className='spotify-status ok'; }
+
+  var start = Date.now();
+  window.location.href = appUrl;
+
+  setTimeout(function(){
+    if (Date.now() - start < 2000) {
+      window.location.href = webUrl;
+    }
+    if(s){ setTimeout(function(){ s.textContent=''; s.className='spotify-status'; },1800); }
+  }, 1200);
+}
+
+/* Both buttons use the exact same open/fallback behaviour */
+function openSpotify(){ openSpotifyLink(); }
+function testSpotify() {
+  openSpotifyLink();
+}
+
+/* ── MAIN RENDER ─────────────────────────────────────────── */
+function render(){
+  var roster=loadRoster(), el=document.getElementById('main-content');
+
+  if(!roster){
+    el.innerHTML=
+      '<div class="empty-state">'
+        +'<div class="empty-icon">⛏️</div>'
+        +'<div class="empty-title">Set up your roster</div>'
+        +'<div class="empty-sub">Enter your swing start date and roster pattern to start counting down.</div>'
+        +'<button class="cta-btn" onclick="openPanel()">Enter Roster Details</button>'
+      +'</div>'
+      +'<div class="alarm-status-row hidden" id="alarm-status-line"></div>';
+    renderAlarmStatus();
     return;
   }
 
-  var start      = parseDate(roster.startDate);
-  var daysOn     = parseInt(roster.daysOn,  10);
-  var daysOff    = parseInt(roster.daysOff, 10);
-  var now        = today();
-  var dayOfRoster = diffDays(start, now) + 1;
-  var cycleLen   = daysOn + daysOff;
-  var elapsed    = diffDays(start, now);
-  var cycles     = elapsed >= 0 ? Math.floor(elapsed / cycleLen) : 0;
-  var curCycleStart = addDays(start, cycles * cycleLen);
-  var curFlyHome    = addDays(curCycleStart, daysOn);
-  var curCycleOffEnd = addDays(curCycleStart, cycleLen);
+  var start=parseDate(roster.startDate), daysOn=parseInt(roster.daysOn,10), daysOff=parseInt(roster.daysOff,10);
+  var now=today(), elapsed=diffDays(start,now);
+  var cycleLen=daysOn+daysOff, cycles=elapsed>=0?Math.floor(elapsed/cycleLen):0;
+  var curStart=addDays(start,cycles*cycleLen), curFlyHome=addDays(curStart,daysOn), curEnd=addDays(curStart,cycleLen);
+  var isOnSwing=(elapsed>=0)&&(now<curFlyHome);
+  var nextSwing=isOnSwing?null:curEnd;
+  var dayOfSwing=Math.max(1,Math.min(daysOn,diffDays(curStart,now)+1));
+  var daysLeft=Math.max(0,diffDays(now,curFlyHome));
+  var offGone=isOnSwing?0:diffDays(curFlyHome,now);
+  var offLeft=isOnSwing?daysOff:Math.max(0,daysOff-offGone);
+  var pct=isOnSwing?Math.min(100,Math.round(((daysOn-daysLeft)/daysOn)*100)):Math.min(100,Math.round((offGone/daysOff)*100));
+  var heroNum=isOnSwing?daysLeft:offLeft;
+  var hc=isOnSwing?(daysLeft<=2?'danger':''):'ok';
 
-  var isOnSwing = (elapsed >= 0) && (now < curFlyHome);
-  var nextSwingStart = isOnSwing ? null : curCycleOffEnd;
+  var h=
+    '<div class="hero">'
+      +'<div class="hero-label">'+(isOnSwing?'Days left on swing':'Days left at home')+'</div>'
+      +'<div class="hero-number '+hc+'">'+heroNum+'</div>'
+      +'<div class="hero-unit">'+(heroNum===1?'day':'days')+'</div>'
+      +'<div class="hero-sub">'+(isOnSwing
+        ?'Fly home <strong>'+(daysLeft===0?'today! ✈️':formatDate(curFlyHome))+'</strong>'
+        :'Back on site <strong>'+formatDate(nextSwing||curFlyHome)+'</strong>')+'</div>'
+      +'<div class="progress-wrap"><div class="progress-fill '+(isOnSwing?'':'done')+'" style="width:'+pct+'%"></div></div>'
+      +'<div class="progress-label">'
+        +'<span>'+(isOnSwing?'Day 1':'Fly-home')+'</span>'
+        +'<span>'+pct+'%</span>'
+        +'<span>'+(isOnSwing?'Day '+daysOn:'Back on site')+'</span>'
+      +'</div>'
+    +'</div>'
+    +'<div class="stat-grid">';
 
-  var actualDayOfSwing = Math.max(1, Math.min(daysOn, diffDays(curCycleStart, now) + 1));
-  var actualDaysLeft   = Math.max(0, diffDays(now, curFlyHome));
-  var offDaysGone      = isOnSwing ? 0 : diffDays(curFlyHome, now);
-  var offDaysLeft      = isOnSwing ? daysOff : Math.max(0, daysOff - offDaysGone);
-
-  var pct = isOnSwing
-    ? Math.min(100, Math.round(((daysOn - actualDaysLeft) / daysOn) * 100))
-    : Math.min(100, Math.round((offDaysGone / daysOff) * 100));
-
-  var heroNum   = isOnSwing ? actualDaysLeft : offDaysLeft;
-  var heroClass = isOnSwing ? (actualDaysLeft <= 2 ? 'danger' : '') : 'ok';
-
-  var html = '<div class="hero">'
-    + '<div class="hero-label">' + (isOnSwing ? 'Days left on swing' : 'Days left at home') + '</div>'
-    + '<div class="hero-number ' + heroClass + '">' + heroNum + '</div>'
-    + '<div class="hero-unit">' + (heroNum === 1 ? 'day' : 'days') + '</div>'
-    + '<div class="hero-sub">' + (isOnSwing
-        ? 'Fly home <strong>' + (actualDaysLeft === 0 ? 'today! ✈️' : formatDate(curFlyHome)) + '</strong>'
-        : 'Back on site <strong>' + formatDate(nextSwingStart || curFlyHome) + '</strong>')
-    + '</div>'
-    + '<div class="progress-wrap"><div class="progress-fill ' + (isOnSwing ? '' : 'done') + '" style="width:' + pct + '%"></div></div>'
-    + '<div class="progress-label"><span>' + (isOnSwing ? 'Day 1' : 'Fly-home') + '</span><span>' + pct + '%</span><span>' + (isOnSwing ? 'Day ' + daysOn : 'Back on site') + '</span></div>'
-    + '</div>'
-    + '<div class="stat-grid">';
-
-  if (isOnSwing) {
-    html += '<div class="stat-card"><div class="stat-label">Swing Day</div><div class="stat-value accent">' + actualDayOfSwing + ' <span style="font-size:14px;color:var(--muted)">/ ' + daysOn + '</span></div><div class="stat-sub">of ' + daysOn + ' days on</div></div>'
-      + '<div class="stat-card"><div class="stat-label">Days Left</div><div class="stat-value ' + (actualDaysLeft <= 2 ? 'danger' : '') + '">' + actualDaysLeft + '</div><div class="stat-sub">until fly-home</div></div>'
-      + '<div class="stat-card wide"><div class="stat-label">Fly-home Date</div><div class="stat-value" style="font-size:20px">' + formatDate(curFlyHome) + ' ✈️</div></div>'
-      + '<div class="stat-card"><div class="stat-label">Days Off</div><div class="stat-value ok">' + daysOff + '</div><div class="stat-sub">when you get home</div></div>'
-      + '<div class="stat-card"><div class="stat-label">Back on Site</div><div class="stat-value" style="font-size:18px">' + formatDate(addDays(curFlyHome, daysOff)) + '</div></div>';
+  if(isOnSwing){
+    h+='<div class="stat-card">'
+        +'<div class="stat-label">Swing Day</div>'
+        +'<div class="stat-value accent">'+dayOfSwing+' <span style="font-size:15px;color:var(--muted)">/ '+daysOn+'</span></div>'
+        +'<div class="stat-sub">of '+daysOn+' days on</div>'
+      +'</div>'
+      +'<div class="stat-card">'
+        +'<div class="stat-label">Days Left</div>'
+        +'<div class="stat-value '+(daysLeft<=2?'danger':'')+'">'+daysLeft+'</div>'
+        +'<div class="stat-sub">until fly-home</div>'
+      +'</div>'
+      +'<div class="stat-card wide">'
+        +'<div class="stat-label">Fly-home Date</div>'
+        +'<div class="stat-value" style="font-size:22px">'+formatDate(curFlyHome)+' ✈️</div>'
+      +'</div>'
+      +'<div class="stat-card">'
+        +'<div class="stat-label">Days Off</div>'
+        +'<div class="stat-value ok">'+daysOff+'</div>'
+        +'<div class="stat-sub">when you get home</div>'
+      +'</div>'
+      +'<div class="stat-card">'
+        +'<div class="stat-label">Back on Site</div>'
+        +'<div class="stat-value" style="font-size:19px">'+formatDate(addDays(curFlyHome,daysOff))+'</div>'
+      +'</div>';
   } else {
-    html += '<div class="stat-card wide"><div class="stat-label">You\'re home! 🏠</div><div class="stat-value ok">' + offDaysLeft + '</div><div class="stat-sub">days off remaining</div></div>'
-      + '<div class="stat-card wide"><div class="stat-label">Back on site</div><div class="stat-value" style="font-size:20px">' + formatDate(nextSwingStart) + '</div></div>'
-      + '<div class="stat-card"><div class="stat-label">Days Off Gone</div><div class="stat-value">' + offDaysGone + '</div><div class="stat-sub">of ' + daysOff + '</div></div>'
-      + '<div class="stat-card"><div class="stat-label">Roster Pattern</div><div class="stat-value">' + daysOn + '/' + daysOff + '</div><div class="stat-sub">on / off</div></div>';
+    h+='<div class="stat-card wide">'
+        +'<div class="stat-label">You\'re home! 🏠</div>'
+        +'<div class="stat-value ok">'+offLeft+'</div>'
+        +'<div class="stat-sub">days off remaining</div>'
+      +'</div>'
+      +'<div class="stat-card wide">'
+        +'<div class="stat-label">Back on site</div>'
+        +'<div class="stat-value" style="font-size:22px">'+formatDate(nextSwing)+'</div>'
+      +'</div>'
+      +'<div class="stat-card">'
+        +'<div class="stat-label">Days Off Gone</div>'
+        +'<div class="stat-value">'+offGone+'</div>'
+        +'<div class="stat-sub">of '+daysOff+'</div>'
+      +'</div>'
+      +'<div class="stat-card">'
+        +'<div class="stat-label">Roster Pattern</div>'
+        +'<div class="stat-value">'+daysOn+'/'+daysOff+'</div>'
+        +'<div class="stat-sub">on / off</div>'
+      +'</div>';
   }
 
-  html += '</div><div class="today-row"><div class="today-dot"></div>Today is ' + formatDate(now) + ' &bull; ' + roster.daysOn + '/' + roster.daysOff + ' roster</div>';
-  el.innerHTML = html;
+  h+='</div>'  // end stat-grid
+    +'<div class="today-row"><div class="today-dot"></div>Today is '+formatDate(now)+' &bull; '+roster.daysOn+'/'+roster.daysOff+' roster</div>'
+    +'<div class="alarm-status-row hidden" id="alarm-status-line"></div>';
+
+  el.innerHTML=h;
+  renderAlarmStatus();
 }
 
-// ── Panel ─────────────────────────────────────────────────────
-function openPanel() {
-  var roster = load();
-  if (roster) {
-    document.getElementById('startDate').value = roster.startDate;
-    document.getElementById('daysOn').value    = roster.daysOn;
-    document.getElementById('daysOff').value   = roster.daysOff;
-  } else {
-    var d = new Date();
-    var pad = function(n) { return String(n).padStart(2,'0'); };
-    document.getElementById('startDate').value = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
-    document.getElementById('daysOn').value  = '14';
-    document.getElementById('daysOff').value = '7';
-  }
+/* ── ROSTER PANEL ────────────────────────────────────────── */
+function openPanel(){
+  var r=loadRoster();
+  if(r){ document.getElementById('startDate').value=r.startDate; document.getElementById('daysOn').value=r.daysOn; document.getElementById('daysOff').value=r.daysOff; }
+  else{ var d=new Date(), pad=function(n){return String(n).padStart(2,'0');};
+    document.getElementById('startDate').value=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    document.getElementById('daysOn').value='14'; document.getElementById('daysOff').value='7'; }
+  populateAlarmSettings();
+  populateSpotifySettings();
   document.getElementById('overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 }
-function closePanel() {
-  document.getElementById('overlay').classList.remove('open');
-  document.body.style.overflow = '';
+function closePanel(){ document.getElementById('overlay').classList.remove('open'); document.body.style.overflow=''; }
+function handleOverlayClick(e){ if(e.target===document.getElementById('overlay')) closePanel(); }
+function saveAndClose(){
+  var s=document.getElementById('startDate').value;
+  var on=parseInt(document.getElementById('daysOn').value,10);
+  var off=parseInt(document.getElementById('daysOff').value,10);
+  if(!s){ alert('Please enter your swing start date.'); return; }
+  if(!on||on<1){ alert('Days ON must be at least 1.'); return; }
+  if(!off||off<1){ alert('Days OFF must be at least 1.'); return; }
+  saveRoster({startDate:s,daysOn:on,daysOff:off}); closePanel(); render();
 }
-function handleOverlayClick(e) { if (e.target === document.getElementById('overlay')) closePanel(); }
-function saveAndClose() {
-  var startDate = document.getElementById('startDate').value;
-  var daysOn    = parseInt(document.getElementById('daysOn').value, 10);
-  var daysOff   = parseInt(document.getElementById('daysOff').value, 10);
-  if (!startDate)           { alert('Please enter your swing start date.'); return; }
-  if (!daysOn  || daysOn  < 1) { alert('Days ON must be at least 1.');  return; }
-  if (!daysOff || daysOff < 1) { alert('Days OFF must be at least 1.'); return; }
-  save({ startDate: startDate, daysOn: daysOn, daysOff: daysOff });
-  closePanel(); render();
+function clearRoster(){
+  if(confirm('Clear your roster details?')){ localStorage.removeItem(ROSTER_KEY); closePanel(); render(); }
 }
-function clearRoster() {
-  if (confirm('Clear your roster details?')) {
-    localStorage.removeItem(STORAGE_KEY); closePanel(); render();
-  }
-}
-function step(id, delta) {
-  var el = document.getElementById(id);
-  var val = parseInt(el.value, 10) || 0;
-  el.value = Math.max(parseInt(el.min,10)||1, Math.min(parseInt(el.max,10)||365, val + delta));
+function step(id,delta){
+  var el=document.getElementById(id), v=parseInt(el.value,10)||0;
+  el.value=Math.max(parseInt(el.min,10)||1,Math.min(parseInt(el.max,10)||365,v+delta));
 }
 
-// ── Boot ──────────────────────────────────────────────────────
+/* ── BOOT ────────────────────────────────────────────────── */
 render();
-var msToMidnight = function() {
-  var now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate()+1) - now;
-};
-setTimeout(function() { render(); setInterval(render, 86400000); }, msToMidnight());
+var msToMidnight=function(){ var n=new Date(); return new Date(n.getFullYear(),n.getMonth(),n.getDate()+1)-n; };
+setTimeout(function(){ render(); setInterval(render,86400000); }, msToMidnight());
 </script>
 </body>
 </html>
+

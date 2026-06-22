@@ -265,6 +265,77 @@
   }
 
   /* ─────────────────────────────────────────────────────────
+     NOTES CARD
+  ───────────────────────────────────────────────────────── */
+  .notes-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px; display: flex;
+    flex-direction: column; gap: 12px;
+  }
+  .notes-title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+  }
+  .notes-textarea {
+    width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 12px; color: var(--text); font-family: var(--sans);
+    font-size: 15px; padding: 14px; outline: none; resize: vertical;
+    min-height: 110px; line-height: 1.5; transition: border-color 0.15s;
+  }
+  .notes-textarea:focus { border-color: var(--accent); }
+
+  /* ─────────────────────────────────────────────────────────
+     PRE-START CHECKLIST CARD
+  ───────────────────────────────────────────────────────── */
+  .checklist-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px; display: flex;
+    flex-direction: column; gap: 14px;
+  }
+  .checklist-title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+  }
+  .checklist-items {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .checklist-item {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 15px; cursor: pointer; user-select: none;
+  }
+  .checklist-item input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 22px; height: 22px; border: 1.5px solid var(--border);
+    border-radius: 6px; background: var(--surface); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s, background-color 0.15s; flex-shrink: 0;
+  }
+  .checklist-item input[type="checkbox"]:checked {
+    background: var(--accent); border-color: var(--accent);
+  }
+  .checklist-item input[type="checkbox"]:checked::before {
+    content: "✓"; color: #0d0f12; font-size: 14px; font-weight: bold;
+  }
+  .checklist-item span {
+    transition: color 0.15s, text-decoration 0.15s;
+  }
+  .checklist-item input[type="checkbox"]:checked + span {
+    color: var(--muted); text-decoration: line-through;
+  }
+  .checklist-clear-btn {
+    align-self: flex-start; background: transparent; color: var(--danger);
+    border: 1.5px solid var(--danger); border-radius: 10px;
+    padding: 10px 18px; font-family: var(--sans); font-size: 14px;
+    font-weight: 600; cursor: pointer; transition: background 0.15s;
+    margin-top: 6px; min-height: 40px;
+  }
+  .checklist-clear-btn:active { background: rgba(224,90,78,0.1); }
+  .checklist-feedback {
+    font-size: 15px; font-weight: 600; color: var(--ok);
+    display: flex; align-items: center; gap: 8px; margin-top: 4px;
+  }
+
+  /* ─────────────────────────────────────────────────────────
      FULL-SCREEN WAKE-UP ALERT
   ───────────────────────────────────────────────────────── */
   #alarm-alert {
@@ -528,7 +599,7 @@
   <div class="alarm-alert-title">Wake up<br>legend</div>
   <div class="alarm-alert-sub">Time to get moving mate</div>
   <div class="alarm-alert-btns">
-    <button class="stop-alarm-btn" onclick="stopAlarm()">🛑 &nbsp;STOP ALARM</button>
+    <button class="stop-alarm-btn" onclick="stopAlarm()">✅ I'M UP</button>
     <button class="snooze-alarm-btn" onclick="snoozeAlarm()">😴 &nbsp;Snooze</button>
     <button class="alarm-spotify-btn" onclick="openSpotify()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -648,9 +719,11 @@
 })();
 
 /* ── STORAGE ─────────────────────────────────────────────── */
-var ROSTER_KEY  = 'fifo_roster_v1';
-var ALARM_KEY   = 'fifo_alarm_v1';
-var SPOTIFY_KEY = 'fifo_spotify_v1';
+var ROSTER_KEY    = 'fifo_roster_v1';
+var ALARM_KEY     = 'fifo_alarm_v1';
+var SPOTIFY_KEY   = 'fifo_spotify_v1';
+var NOTES_KEY     = 'fifo_notes_v1';
+var CHECKLIST_KEY = 'fifo_checklist_v1';
 
 function loadRoster(){
   try{ var r=localStorage.getItem(ROSTER_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
@@ -668,6 +741,25 @@ function loadSpotify(){
   catch(e){ return {url:''}; }
 }
 function saveSpotify(d){ localStorage.setItem(SPOTIFY_KEY,JSON.stringify(d)); }
+
+function loadNotes(){
+  try{ return localStorage.getItem(NOTES_KEY) || ''; }catch(e){ return ''; }
+}
+function saveNotes(v){
+  try{ localStorage.setItem(NOTES_KEY, v); }catch(e){}
+}
+
+function loadChecklist(){
+  try{
+    var r=localStorage.getItem(CHECKLIST_KEY);
+    return r ? JSON.parse(r) : [false, false, false, false, false, false, false];
+  }catch(e){
+    return [false, false, false, false, false, false, false];
+  }
+}
+function saveChecklist(d){
+  try{ localStorage.setItem(CHECKLIST_KEY, JSON.stringify(d)); }catch(e){}
+}
 
 /* ── DATE HELPERS ────────────────────────────────────────── */
 function today(){ var d=new Date(); d.setHours(0,0,0,0); return d; }
@@ -893,7 +985,42 @@ function openSpotifyLink(){
 /* Both buttons use the exact same open/fallback behaviour */
 function openSpotify(){ openSpotifyLink(); }
 function testSpotify() {
-  openSpotifyLink();
+  alert("Test button pressed");
+  window.location.href = "spotify://";
+}
+
+/* ── NOTES HANDLERS ──────────────────────────────────────── */
+function onNotesInput(val){
+  saveNotes(val);
+}
+
+/* ── CHECKLIST HANDLERS ──────────────────────────────────── */
+function onChecklistChange(el){
+  var idx = parseInt(el.getAttribute('data-index'), 10);
+  var states = loadChecklist();
+  states[idx] = el.checked;
+  saveChecklist(states);
+
+  var allChecked = states.every(Boolean);
+  var fb = document.getElementById('checklist-feedback');
+  if(fb){
+    if(allChecked){
+      fb.classList.remove('hidden');
+    } else {
+      fb.classList.add('hidden');
+    }
+  }
+}
+
+function clearChecklist(){
+  var defaultStates = [false, false, false, false, false, false, false];
+  saveChecklist(defaultStates);
+  var allCheckboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+  allCheckboxes.forEach(function(cb){
+    cb.checked = false;
+  });
+  var fb = document.getElementById('checklist-feedback');
+  if(fb) fb.classList.add('hidden');
 }
 
 /* ── MAIN RENDER ─────────────────────────────────────────── */
@@ -990,8 +1117,49 @@ function render(){
       +'</div>';
   }
 
-  h+='</div>'  // end stat-grid
-    +'<div class="today-row"><div class="today-dot"></div>Today is '+formatDate(now)+' &bull; '+roster.daysOn+'/'+roster.daysOff+' roster</div>'
+  h+='</div>'; // end stat-grid
+
+  // Notes Card
+  var savedNotes = loadNotes();
+  h+='<div class="notes-card">'
+      +'<div class="notes-title">Notes</div>'
+      +'<textarea id="notes-textarea" class="notes-textarea" placeholder="Notes for this swing…" oninput="onNotesInput(this.value)">'+escHtml(savedNotes)+'</textarea>'
+    +'</div>';
+
+  // Checklist Card
+  var checklistStates = loadChecklist();
+  var checklistItems = [
+    "Lunch packed",
+    "Water bottle",
+    "Wallet",
+    "Keys",
+    "PPE",
+    "Phone charger",
+    "Ready to roll"
+  ];
+
+  h+='<div class="checklist-card">'
+      +'<div class="checklist-title">Pre-Start Checklist</div>'
+      +'<div class="checklist-items">';
+
+  for(var i = 0; i < checklistItems.length; i++){
+    var isChecked = checklistStates[i] ? 'checked' : '';
+    h+='<label class="checklist-item">'
+        +'<input type="checkbox" data-index="'+i+'" onchange="onChecklistChange(this)" '+isChecked+'>'
+        +'<span>'+checklistItems[i]+'</span>'
+      +'</label>';
+  }
+
+  h+='</div>'; // end checklist-items
+
+  var allChecked = checklistStates.length === checklistItems.length && checklistStates.every(Boolean);
+  var feedbackHidden = allChecked ? '' : 'hidden';
+
+  h+='<div id="checklist-feedback" class="checklist-feedback '+feedbackHidden+'">👍 Ready to roll, legend.</div>'
+      +'<button class="checklist-clear-btn" onclick="clearChecklist()">Clear Checklist</button>'
+    +'</div>'; // end checklist-card
+
+  h+='<div class="today-row"><div class="today-dot"></div>Today is '+formatDate(now)+' &bull; '+roster.daysOn+'/'+roster.daysOff+' roster</div>'
     +'<div class="alarm-status-row hidden" id="alarm-status-line"></div>';
 
   el.innerHTML=h;
@@ -1035,5 +1203,5 @@ var msToMidnight=function(){ var n=new Date(); return new Date(n.getFullYear(),n
 setTimeout(function(){ render(); setInterval(render,86400000); }, msToMidnight());
 </script>
 </body>
-</html>
+</html>>
 

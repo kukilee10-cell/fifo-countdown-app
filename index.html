@@ -627,15 +627,38 @@ function isMorningActive(){
 /* ══════════════════════════════════════════════════════════
    ALARM AUDIO  — loud beep-beep-beep pattern
 ══════════════════════════════════════════════════════════ */
-var audioCtx=null, alarmBeepLoop=null;
+var audioCtx=null, alarmBeepLoop=null, keepAliveInterval=null;
+var testingAlarm = false;
 
 function getAudioCtx(){
   if(!audioCtx){ try{ audioCtx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
   return audioCtx;
 }
+
+function startKeepAlive() {
+  if (keepAliveInterval) return;
+  keepAliveInterval = setInterval(function() {
+    var ctx = getAudioCtx();
+    if (ctx && ctx.state === 'running') {
+      try {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.05);
+      } catch(e) {}
+    }
+  }, 10000);
+}
+
 function beep(freq,dur,vol,when){
   var ctx=getAudioCtx(); if(!ctx) return;
   try{
+    if (ctx.state === 'interrupted') {
+      ctx.resume().catch(function(){});
+    }
     var o=ctx.createOscillator(), g=ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
     o.type='square'; o.frequency.setValueAtTime(freq, when||ctx.currentTime);
@@ -644,6 +667,7 @@ function beep(freq,dur,vol,when){
     o.start(when||ctx.currentTime); o.stop((when||ctx.currentTime)+dur+0.01);
   }catch(e){}
 }
+
 function playAlarmPattern(){
   /* Three sharp blasts at high volume */
   var ctx=getAudioCtx(); if(!ctx) return;
@@ -653,14 +677,100 @@ function playAlarmPattern(){
   beep(1046,0.14,0.7,t+0.40);
   beep(1318,0.30,0.75,t+0.65);
 }
+
 function startAlarmSound(){
   stopAlarmSound();
+  var ctx = getAudioCtx();
+  if (ctx && (ctx.state === 'suspended' || ctx.state === 'interrupted')) {
+    ctx.resume().catch(function(){});
+  }
   playAlarmPattern();
   alarmBeepLoop=setInterval(playAlarmPattern, 1400);
 }
+
 function stopAlarmSound(){
   if(alarmBeepLoop){ clearInterval(alarmBeepLoop); alarmBeepLoop=null; }
+  testingAlarm = false;
+  var btn = document.getElementById('test-sound-btn');
+  if (btn) btn.textContent = '🔊 Test Alarm Sound';
 }
+
+function enableAlarmSound() {
+  var ctx = getAudioCtx();
+  if (ctx) {
+    if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+      ctx.resume().then(function() {
+        beep(880, 0.15, 0.3);
+        startKeepAlive();
+        updateEnableBtn();
+      }).catch(function(e) {
+        console.error(e);
+      });
+    } else {
+      beep(880, 0.15, 0.3);
+      startKeepAlive();
+      updateEnableBtn();
+    }
+  }
+}
+
+function updateEnableBtn() {
+  var btn = document.getElementById('enable-sound-btn');
+  if (btn) {
+    btn.textContent = '✅ Alarm Sound Enabled';
+    btn.style.borderColor = 'var(--ok)';
+    btn.style.color = 'var(--ok)';
+  }
+}
+
+function testAlarmSound() {
+  var ctx = getAudioCtx();
+  if (!ctx) return;
+  if (testingAlarm) {
+    stopAlarmSound();
+  } else {
+    if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+      ctx.resume().then(function() {
+        startKeepAlive();
+        testingAlarm = true;
+        var btn = document.getElementById('test-sound-btn');
+        if (btn) btn.textContent = '⏹️ Stop Test Sound';
+        startAlarmSound();
+      });
+    } else {
+      testingAlarm = true;
+      var btn = document.getElementById('test-sound-btn');
+      if (btn) btn.textContent = '⏹️ Stop Test Sound';
+      startAlarmSound();
+    }
+  }
+}
+
+function initAudioOnFirstUserGesture() {
+  var unlock = function() {
+    var ctx = getAudioCtx();
+    if (ctx) {
+      if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+        ctx.resume().then(function() {
+          startKeepAlive();
+          removeListeners();
+        }).catch(function() {
+          // Keep listeners so they can try again
+        });
+      } else {
+        startKeepAlive();
+        removeListeners();
+      }
+    }
+  };
+  function removeListeners() {
+    document.removeEventListener('click', unlock);
+    document.removeEventListener('touchstart', unlock);
+  }
+  document.addEventListener('click', unlock);
+  document.addEventListener('touchstart', unlock);
+}
+initAudioOnFirstUserGesture();
 
 /* ══════════════════════════════════════════════════════════
    ALARM TRIGGER / STOP / SNOOZE
@@ -680,7 +790,11 @@ function triggerAlarm(){
   document.getElementById('alarm-alert').classList.add('active');
   document.body.style.overflow='hidden';
   var ctx=getAudioCtx();
-  if(ctx&&ctx.state==='suspended'){ ctx.resume().then(startAlarmSound); } else { startAlarmSound(); }
+  if(ctx && (ctx.state==='suspended' || ctx.state==='interrupted')){ 
+    ctx.resume().then(startAlarmSound).catch(function(){ startAlarmSound(); }); 
+  } else { 
+    startAlarmSound(); 
+  }
 }
 
 function stopAlarm(){
@@ -901,6 +1015,7 @@ function openPanel(){
   document.body.style.overflow='hidden';
 }
 function closePanel(){
+  stopAlarmSound();
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow='';
 }
@@ -910,6 +1025,7 @@ function handleOverlayClick(e){
 
 /* ── Main menu ─────────────────────────────────────────── */
 function renderSettingsMenu(){
+  stopAlarmSound();
   var alarm=loadAlarm();
   var alarmSub=alarm.on?('Alarm on · '+fmt12(alarm.time)):'Alarm off';
   var sp=loadSpotify();
@@ -993,8 +1109,21 @@ function openSubAlarm(){
       +'<button type="button" class="snooze-pill '+p15+'" data-min="15" onclick="selectSnooze(15)">15 min</button>'
     +'</div></div>'
     +'<button class="panel-save-btn" onclick="saveAlarmSub()">Save Alarm</button>'
-    +'<div id="alarm-sub-msg" style="padding:10px 22px 0;font-size:13px;color:var(--ok);"></div>';
+    +'<div id="alarm-sub-msg" style="padding:10px 22px 0;font-size:13px;color:var(--ok);"></div>'
+    +'<div class="p-divider"></div>'
+    +'<div class="p-section-head">Alarm Sound (iOS Setup)</div>'
+    +'<div class="form-group" style="display:flex; flex-direction:column; gap:10px;">'
+      +'<button type="button" class="panel-save-notes-btn" id="enable-sound-btn" style="margin:0; width:100%;" onclick="enableAlarmSound()">🔊 Enable Alarm Sound</button>'
+      +'<button type="button" class="panel-save-notes-btn" id="test-sound-btn" style="margin:0; width:100%;" onclick="testAlarmSound()">🔊 Test Alarm Sound</button>'
+    +'</div>';
   document.getElementById('settings-panel').innerHTML=h;
+
+  setTimeout(function(){
+    var ctx = getAudioCtx();
+    if (ctx && ctx.state === 'running') {
+      updateEnableBtn();
+    }
+  }, 50);
 }
 
 function toggleAlarm(on){

@@ -27,6 +27,7 @@
     --accent-dk: #c4831a;
     --danger:    #e05a4e;
     --ok:        #4caf50;
+    --ok-dk:     #2e7d32;
     --spotify:   #1db954;
     --spotify-dk:#17a349;
     --text:      #e8ecf0;
@@ -164,10 +165,10 @@
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 24px 16px 56px;   /* more top + more bottom breathing room */
+    padding: 20px 14px 60px;
     display: flex;
     flex-direction: column;
-    gap: 24px;                  /* more space between every section */
+    gap: 16px;
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -193,11 +194,16 @@
   ───────────────────────────────────────────────────────── */
   .hero {
     background: var(--card); border: 1px solid var(--border);
-    border-radius: 22px; padding: 32px 24px 28px;
-    text-align: center; position: relative; overflow: hidden;
+    border-radius: 22px; padding: 28px 20px 24px;
+    text-align: center; position: relative;
+    /* subtle amber glow */
+    box-shadow: 0 0 0 1px var(--border),
+                0 8px 32px rgba(245,166,35,0.08),
+                0 0 48px rgba(245,166,35,0.05);
   }
   .hero::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: 22px 22px 0 0;
     background: linear-gradient(90deg, var(--accent-dk), var(--accent), var(--accent-dk));
   }
   .hero-label {
@@ -205,8 +211,13 @@
     text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
   }
   .hero-number {
-    font-family: var(--mono); font-size: clamp(80px,24vw,108px);
-    font-weight: 500; line-height: 1; color: var(--accent); letter-spacing: -0.02em;
+    font-family: var(--mono);
+    /* clamp: min 72px so it's always readable; scale with viewport; max 104px */
+    font-size: clamp(72px, 20vw, 104px);
+    font-weight: 500; line-height: 1.05; color: var(--accent);
+    letter-spacing: -0.02em;
+    /* ensure the number is never clipped */
+    overflow: visible; display: block; width: 100%;
   }
   .hero-number.danger { color: var(--danger); }
   .hero-number.done   { color: var(--ok); }
@@ -214,7 +225,7 @@
     font-family: var(--mono); font-size: 16px; letter-spacing: 0.1em;
     text-transform: uppercase; color: var(--muted); margin-top: 4px;
   }
-  .hero-sub { margin-top: 16px; font-size: 15px; color: var(--muted); line-height: 1.5; }
+  .hero-sub { margin-top: 14px; font-size: 15px; color: var(--muted); line-height: 1.5; }
   .hero-sub strong { color: var(--text); font-weight: 600; }
 
   .progress-wrap {
@@ -235,15 +246,17 @@
   /* ─────────────────────────────────────────────────────────
      STAT GRID
   ───────────────────────────────────────────────────────── */
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .stat-card {
     background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 20px 16px;   /* more internal padding */
+    border-radius: 16px; padding: 16px 14px;
   }
   .stat-card.wide { grid-column: 1 / -1; }
+  /* Compact card for Fly-home Date — slightly less vertical padding */
+  .stat-card.compact { padding: 12px 14px; }
   .stat-label {
     font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em;
-    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
   }
   .stat-value {
     font-family: var(--mono); font-size: 28px; font-weight: 500;
@@ -252,6 +265,11 @@
   .stat-value.accent { color: var(--accent); }
   .stat-value.ok     { color: var(--ok); }
   .stat-value.danger { color: var(--danger); }
+  /* Date values — keep on one line */
+  .stat-value.date-val {
+    font-size: 16px; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .stat-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
   /* Today row */
@@ -262,45 +280,6 @@
   .today-dot {
     width: 8px; height: 8px; border-radius: 50%;
     background: var(--accent); flex-shrink: 0;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     DON'T FORGET LIST & NOTES STYLING
-  ───────────────────────────────────────────────────────── */
-  .checklist-clear-btn {
-    display: block;
-    background: transparent;
-    color: var(--danger);
-    border: 1.5px solid var(--danger);
-    border-radius: 14px;
-    padding: 16px;
-    font-family: var(--sans);
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    min-height: 54px;
-    transition: background 0.15s;
-  }
-  .checklist-clear-btn:active {
-    background: rgba(224,90,78,0.1);
-  }
-  .notes-textarea {
-    width: 100%;
-    background: var(--card);
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 15px;
-    padding: 16px;
-    outline: none;
-    resize: vertical;
-    min-height: 120px;
-    line-height: 1.5;
-    transition: border-color 0.15s;
-  }
-  .notes-textarea:focus {
-    border-color: var(--accent);
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -315,7 +294,7 @@
   #alarm-alert.active { display: flex; }
   @keyframes alarmPulse {
     from { background: #0a0c0e; }
-    to   { background: #1c0e00; }
+    to   { background: #071a09; }
   }
   .alarm-alert-icon {
     font-size: 80px; line-height: 1; margin-bottom: 28px;
@@ -332,14 +311,15 @@
   .alarm-alert-sub {
     font-size: 18px; color: var(--muted); margin-bottom: 52px; line-height: 1.5;
   }
+  /* ── I'M UP button — green ── */
   .stop-alarm-btn {
-    background: var(--ok); color: #000; border: none; border-radius: 20px;
+    background: var(--ok); color: #fff; border: none; border-radius: 20px;
     padding: 24px 48px; font-family: var(--sans); font-size: 21px; font-weight: 700;
     cursor: pointer; letter-spacing: 0.04em; min-height: 72px; width: 100%;
-    max-width: 340px; box-shadow: 0 0 48px var(--ok);
+    max-width: 340px; box-shadow: 0 0 48px rgba(76,175,80,0.45);
     transition: transform 0.1s;
   }
-  .stop-alarm-btn:active { transform: scale(0.96); }
+  .stop-alarm-btn:active { transform: scale(0.96); background: var(--ok-dk); }
   .alarm-alert-time {
     font-family: var(--mono); font-size: 14px; color: var(--muted); margin-top: 28px;
     line-height: 1.6;
@@ -492,7 +472,6 @@
   .spotify-status.ok  { color: var(--spotify); }
   .spotify-status.err { color: var(--danger); }
 
-  /* Save confirmation pulse for alarm/spotify saves inside settings */
   .panel-save-btn {
     display: block; width: calc(100% - 44px); margin: 4px 22px 0;
     background: var(--accent); color: #000; border: none; border-radius: 14px;
@@ -504,6 +483,65 @@
     background: var(--spotify); color: #000;
   }
   .panel-save-btn.spotify-save:active { background: var(--spotify-dk); }
+
+  /* ─────────────────────────────────────────────────────────
+     NOTES & DON'T FORGET — panel textareas
+  ───────────────────────────────────────────────────────── */
+  .panel-textarea {
+    width: 100%; background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 14px; color: var(--text); font-family: var(--sans);
+    font-size: 15px; line-height: 1.6; padding: 16px;
+    outline: none; resize: vertical; min-height: 140px;
+    transition: border-color 0.15s;
+  }
+  .panel-textarea:focus { border-color: var(--accent); }
+  .panel-textarea::placeholder { color: var(--muted); }
+  .panel-save-notes-btn {
+    display: block; width: calc(100% - 44px); margin: 10px 22px 0;
+    background: var(--card); color: var(--text); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 15px; font-family: var(--sans); font-size: 15px;
+    font-weight: 600; cursor: pointer; min-height: 52px;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  .panel-save-notes-btn:active { background: var(--border); transform: scale(0.98); }
+  .panel-save-notes-btn.saved { border-color: var(--ok); color: var(--ok); }
+
+  /* ─────────────────────────────────────────────────────────
+     MAIN SCREEN — small alarm status line
+  ───────────────────────────────────────────────────────── */
+  .alarm-status-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; color: var(--muted); padding: 0 2px;
+    font-family: var(--mono);
+  }
+  .alarm-status-row .alarm-status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(245,166,35,0.6);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     WAKE-UP ALERT — 3-button layout
+  ───────────────────────────────────────────────────────── */
+  .alarm-alert-btns {
+    display: flex; flex-direction: column; gap: 14px;
+    width: 100%; max-width: 340px;
+  }
+  .snooze-alarm-btn {
+    background: var(--card); color: var(--accent); border: 1.5px solid var(--accent);
+    border-radius: 20px; padding: 20px; font-family: var(--sans); font-size: 18px;
+    font-weight: 700; cursor: pointer; letter-spacing: 0.02em; min-height: 62px;
+    width: 100%; transition: background 0.15s, transform 0.1s;
+  }
+  .snooze-alarm-btn:active { background: rgba(245,166,35,0.1); transform: scale(0.96); }
+  .alarm-spotify-btn {
+    background: var(--spotify); color: #000; border: none;
+    border-radius: 20px; padding: 20px; font-family: var(--sans); font-size: 18px;
+    font-weight: 700; cursor: pointer; letter-spacing: 0.02em; min-height: 62px;
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .alarm-spotify-btn:active { background: var(--spotify-dk); transform: scale(0.96); }
 
   .hidden { display: none !important; }
 </style>
@@ -530,7 +568,7 @@
   <div class="alarm-alert-title">Wake up<br>legend</div>
   <div class="alarm-alert-sub">Time to get moving mate</div>
   <div class="alarm-alert-btns">
-    <button class="stop-alarm-btn" onclick="stopAlarm()">✅ I'M UP</button>
+    <button class="stop-alarm-btn" onclick="stopAlarm()">✅ &nbsp;I'M UP</button>
     <button class="snooze-alarm-btn" onclick="snoozeAlarm()">😴 &nbsp;Snooze</button>
     <button class="alarm-spotify-btn" onclick="openSpotify()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -552,7 +590,7 @@
 
 <main id="main-content"></main>
 
-<!-- Roster panel -->
+<!-- Roster / Settings panel -->
 <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
   <div class="panel">
     <div class="panel-handle"></div>
@@ -634,21 +672,25 @@
     <div class="spotify-status" id="spotify-status" style="padding:0 22px;margin-top:10px;"></div>
 
     <div class="p-divider" style="margin-top:30px;"></div>
-    <div class="p-section-head">📌 Don’t Forget List</div>
-    <div class="form-group">
-      <textarea id="dontforget-textarea" class="notes-textarea" placeholder="• Flight check-in
-• Site access card
-• Chargers
-• Medications
-• Don’t get lost" oninput="onDontForgetInput(this.value)"></textarea>
-      <button class="checklist-clear-btn" style="width:100%; margin-top:14px;" onclick="clearDontForget()">Clear List</button>
-    </div>
+    <div class="p-section-head">📌 Don't Forget List</div>
 
-    <div class="p-divider" style="margin-top:30px;"></div>
-    <div class="p-section-head">📝 Notes</div>
-    <div class="form-group">
-      <textarea id="notes-textarea" class="notes-textarea" placeholder="Notes for this swing…" oninput="onNotesInput(this.value)"></textarea>
+    <div class="form-group" style="margin-bottom:10px;">
+      <textarea id="dont-forget-textarea" class="panel-textarea"
+        placeholder="• Flight check-in&#10;• Site access card&#10;• Chargers&#10;• Medications&#10;• Don't get lost"
+        oninput="autosaveDontForget()"></textarea>
     </div>
+    <button class="panel-save-notes-btn" id="dont-forget-save-btn" onclick="saveDontForget()">💾 Save List</button>
+
+    <div class="p-divider" style="margin-top:26px;"></div>
+    <div class="p-section-head">📝 Notes</div>
+
+    <div class="form-group" style="margin-bottom:10px;">
+      <textarea id="notes-textarea" class="panel-textarea"
+        placeholder="Notes for this swing…"
+        oninput="autosaveNotes()"></textarea>
+    </div>
+    <button class="panel-save-notes-btn" id="notes-save-btn" onclick="saveNotes()">💾 Save Notes</button>
+
   </div>
 </div>
 
@@ -667,11 +709,11 @@
 })();
 
 /* ── STORAGE ─────────────────────────────────────────────── */
-var ROSTER_KEY    = 'fifo_roster_v1';
-var ALARM_KEY     = 'fifo_alarm_v1';
-var SPOTIFY_KEY   = 'fifo_spotify_v1';
-var NOTES_KEY     = 'fifo_notes_v1';
-var CHECKLIST_KEY = 'fifo_checklist_v1';
+var ROSTER_KEY       = 'fifo_roster_v1';
+var ALARM_KEY        = 'fifo_alarm_v1';
+var SPOTIFY_KEY      = 'fifo_spotify_v1';
+var DONT_FORGET_KEY  = 'fifo_dont_forget_v1';
+var NOTES_KEY        = 'fifo_notes_v1';
 
 function loadRoster(){
   try{ var r=localStorage.getItem(ROSTER_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
@@ -689,25 +731,6 @@ function loadSpotify(){
   catch(e){ return {url:''}; }
 }
 function saveSpotify(d){ localStorage.setItem(SPOTIFY_KEY,JSON.stringify(d)); }
-
-function loadNotes(){
-  try{ return localStorage.getItem(NOTES_KEY) || ''; }catch(e){ return ''; }
-}
-function saveNotes(v){
-  try{ localStorage.setItem(NOTES_KEY, v); }catch(e){}
-}
-
-function loadChecklist(){
-  try{
-    var r=localStorage.getItem(CHECKLIST_KEY);
-    return r ? r : '';
-  }catch(e){
-    return '';
-  }
-}
-function saveChecklist(d){
-  try{ localStorage.setItem(CHECKLIST_KEY, d); }catch(e){}
-}
 
 /* ── DATE HELPERS ────────────────────────────────────────── */
 function today(){ var d=new Date(); d.setHours(0,0,0,0); return d; }
@@ -748,16 +771,16 @@ function startAlarmSound(){ stopAlarmSound(); playAlarmPattern(); alarmBeepLoop=
 function stopAlarmSound(){ if(alarmBeepLoop){ clearInterval(alarmBeepLoop); alarmBeepLoop=null; } }
 
 /* ── ALARM TRIGGER / STOP / SNOOZE ───────────────────────── */
-var alarmFired   = false;
-var snoozeTimer  = null;
-var snoozeUntilTs = null; // epoch ms when a snoozed alarm should re-fire
+var alarmFired    = false;
+var snoozeTimer   = null;
+var snoozeUntilTs = null;
 
 function triggerAlarm(){
   if(alarmFired) return; alarmFired=true;
-  var now=new Date(), alert=document.getElementById('alarm-alert');
+  var now=new Date(), alertEl=document.getElementById('alarm-alert');
   document.getElementById('alarm-alert-time').textContent=
     'Alarm set for '+fmt12(loadAlarm().time)+' — '+now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
-  alert.classList.add('active');
+  alertEl.classList.add('active');
   document.body.style.overflow='hidden';
   var ctx=getAudioCtx();
   if(ctx&&ctx.state==='suspended'){ ctx.resume().then(startAlarmSound); } else { startAlarmSound(); }
@@ -771,16 +794,13 @@ function stopAlarm(){
   if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
 }
 function snoozeAlarm(){
-  // Stop current alert/sound but remember to re-fire after snooze duration
   stopAlarmSound();
   document.getElementById('alarm-alert').classList.remove('active');
   document.body.style.overflow='';
   alarmFired=false;
-
   var alarm=loadAlarm();
   var mins=parseInt(alarm.snooze,10)||10;
   snoozeUntilTs=Date.now()+(mins*60000);
-
   if(snoozeTimer) clearTimeout(snoozeTimer);
   snoozeTimer=setTimeout(function(){
     snoozeUntilTs=null;
@@ -788,7 +808,6 @@ function snoozeAlarm(){
   }, mins*60000);
 }
 function checkAlarm(){
-  // Snoozed alarm takes priority — handled by its own setTimeout, nothing to poll here
   if(snoozeUntilTs) return;
   var alarm=loadAlarm(); if(!alarm.on||!alarm.time) return;
   var now=new Date();
@@ -805,14 +824,12 @@ function populateAlarmSettings(){
   var lbl=document.getElementById('alarm-toggle-label');
   var sub=document.getElementById('alarm-toggle-sub');
   var timeInput=document.getElementById('alarm-time-input');
-  if(!toggle) return; // panel not open yet
-
+  if(!toggle) return;
   toggle.checked=!!alarm.on;
   lbl.textContent=alarm.on?'ON':'OFF';
   lbl.className='toggle-status'+(alarm.on?' on':'');
   sub.textContent=alarm.on?('Rings at '+fmt12(alarm.time)+' daily'):'Off';
   timeInput.value=alarm.time||'06:00';
-
   var mins=parseInt(alarm.snooze,10)||10;
   document.querySelectorAll('.snooze-pill').forEach(function(p){
     p.classList.toggle('active', parseInt(p.dataset.min,10)===mins);
@@ -872,7 +889,6 @@ function populateSpotifySettings(){
   var sp=loadSpotify();
   var input=document.getElementById('spotify-url-input');
   if(input) input.value=sp.url||'';
-  // keep plain key in sync for openSpotifyLink()
   if(sp.url && !localStorage.getItem('spotifyLink')){
     localStorage.setItem('spotifyLink', sp.url);
   }
@@ -889,7 +905,6 @@ function saveSpotifyUrl(){
   var input=document.getElementById('spotify-url-input');
   var url=(input?input.value:'').trim();
   saveSpotify({url:url});
-  // keep plain localStorage key in sync too, since openSpotifyLink() reads from it directly
   localStorage.setItem('spotifyLink', url);
   var s=document.getElementById('spotify-status');
   if(s){
@@ -898,72 +913,81 @@ function saveSpotifyUrl(){
   }
 }
 
-/* ── SPOTIFY DEEP LINK OPEN (exact behaviour requested) ──── */
+/* ── SPOTIFY DEEP LINK OPEN ──────────────────────────────── */
 function openSpotifyLink(){
-  // Pull from whatever is currently typed in Settings first, else fall back to saved value
   var input   = document.getElementById('spotify-url-input');
   var typed   = (input ? input.value : '').trim();
   var savedUrl = typed || localStorage.getItem('spotifyLink') || (loadSpotify().url || '');
   var webUrl  = savedUrl.trim() || 'https://open.spotify.com';
-
-  var appUrl = 'spotify://';
-
-  var match = webUrl.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
-
-  if (match) {
-    var type = match[1];
-    var id   = match[2];
-    appUrl = 'spotify:' + type + ':' + id;
-  }
-
+  var appUrl  = 'spotify://';
+  var match   = webUrl.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+  if(match){ appUrl = 'spotify:' + match[1] + ':' + match[2]; }
   var s = document.getElementById('spotify-status');
   if(s){ s.textContent='Opening Spotify…'; s.className='spotify-status ok'; }
-
   var start = Date.now();
   window.location.href = appUrl;
-
   setTimeout(function(){
-    if (Date.now() - start < 2000) {
-      window.location.href = webUrl;
-    }
+    if(Date.now() - start < 2000){ window.location.href = webUrl; }
     if(s){ setTimeout(function(){ s.textContent=''; s.className='spotify-status'; },1800); }
   }, 1200);
 }
-
-/* Both buttons use the exact same open/fallback behaviour */
 function openSpotify(){ openSpotifyLink(); }
-function testSpotify() {
+function testSpotify(){
   alert("Test button pressed");
   window.location.href = "spotify://";
 }
 
-/* ── NOTES HANDLERS ──────────────────────────────────────── */
-function onNotesInput(val){
-  saveNotes(val);
+/* ── DON'T FORGET LIST ───────────────────────────────────── */
+var dontForgetAutosaveTimer = null;
+
+function populateDontForget(){
+  var ta = document.getElementById('dont-forget-textarea');
+  if(!ta) return;
+  var saved = localStorage.getItem(DONT_FORGET_KEY);
+  if(saved !== null){ ta.value = saved; }
 }
 
-/* ── DON'T FORGET LIST HANDLERS ──────────────────────────── */
-function onDontForgetInput(val){
-  saveChecklist(val);
+function autosaveDontForget(){
+  if(dontForgetAutosaveTimer) clearTimeout(dontForgetAutosaveTimer);
+  dontForgetAutosaveTimer = setTimeout(function(){ saveDontForget(true); }, 800);
 }
 
-function clearDontForget(){
-  saveChecklist('');
-  var dfTextarea = document.getElementById('dontforget-textarea');
-  if(dfTextarea) dfTextarea.value = '';
-}
-
-function populateNotesAndChecklist(){
-  // Notes load
-  var notesTextarea = document.getElementById('notes-textarea');
-  if(notesTextarea){
-    notesTextarea.value = loadNotes();
+function saveDontForget(silent){
+  var ta  = document.getElementById('dont-forget-textarea');
+  var btn = document.getElementById('dont-forget-save-btn');
+  if(!ta) return;
+  localStorage.setItem(DONT_FORGET_KEY, ta.value);
+  if(!silent && btn){
+    btn.textContent = '✓ Saved';
+    btn.classList.add('saved');
+    setTimeout(function(){ btn.textContent = '💾 Save List'; btn.classList.remove('saved'); }, 1800);
   }
+}
 
-  // Checklist load
-  var dfTextarea = document.getElementById('dontforget-textarea');
-  if(dfTextarea){
-    dfTextarea.value = loadChecklist();
+/* ── NOTES ───────────────────────────────────────────────── */
+var notesAutosaveTimer = null;
+
+function populateNotesField(){
+  var ta = document.getElementById('notes-textarea');
+  if(!ta) return;
+  var saved = localStorage.getItem(NOTES_KEY);
+  if(saved !== null){ ta.value = saved; }
+}
+
+function autosaveNotes(){
+  if(notesAutosaveTimer) clearTimeout(notesAutosaveTimer);
+  notesAutosaveTimer = setTimeout(function(){ saveNotes(true); }, 800);
+}
+
+function saveNotes(silent){
+  var ta  = document.getElementById('notes-textarea');
+  var btn = document.getElementById('notes-save-btn');
+  if(!ta) return;
+  localStorage.setItem(NOTES_KEY, ta.value);
+  if(!silent && btn){
+    btn.textContent = '✓ Saved';
+    btn.classList.add('saved');
+    setTimeout(function(){ btn.textContent = '💾 Save Notes'; btn.classList.remove('saved'); }, 1800);
   }
 }
 
@@ -1026,9 +1050,9 @@ function render(){
         +'<div class="stat-value '+(daysLeft<=2?'danger':'')+'">'+daysLeft+'</div>'
         +'<div class="stat-sub">until fly-home</div>'
       +'</div>'
-      +'<div class="stat-card wide">'
+      +'<div class="stat-card wide compact">'
         +'<div class="stat-label">Fly-home Date</div>'
-        +'<div class="stat-value" style="font-size:22px">'+formatDate(curFlyHome)+' ✈️</div>'
+        +'<div class="stat-value date-val">'+formatDate(curFlyHome)+' ✈️</div>'
       +'</div>'
       +'<div class="stat-card">'
         +'<div class="stat-label">Days Off</div>'
@@ -1037,7 +1061,7 @@ function render(){
       +'</div>'
       +'<div class="stat-card">'
         +'<div class="stat-label">Back on Site</div>'
-        +'<div class="stat-value" style="font-size:19px">'+formatDate(addDays(curFlyHome,daysOff))+'</div>'
+        +'<div class="stat-value date-val">'+formatDate(addDays(curFlyHome,daysOff))+'</div>'
       +'</div>';
   } else {
     h+='<div class="stat-card wide">'
@@ -1045,9 +1069,9 @@ function render(){
         +'<div class="stat-value ok">'+offLeft+'</div>'
         +'<div class="stat-sub">days off remaining</div>'
       +'</div>'
-      +'<div class="stat-card wide">'
+      +'<div class="stat-card wide compact">'
         +'<div class="stat-label">Back on site</div>'
-        +'<div class="stat-value" style="font-size:22px">'+formatDate(nextSwing)+'</div>'
+        +'<div class="stat-value date-val">'+formatDate(nextSwing)+'</div>'
       +'</div>'
       +'<div class="stat-card">'
         +'<div class="stat-label">Days Off Gone</div>'
@@ -1061,9 +1085,8 @@ function render(){
       +'</div>';
   }
 
-  h+='</div>'; // end stat-grid
-
-  h+='<div class="today-row"><div class="today-dot"></div>Today is '+formatDate(now)+' &bull; '+roster.daysOn+'/'+roster.daysOff+' roster</div>'
+  h+='</div>'  // end stat-grid
+    +'<div class="today-row"><div class="today-dot"></div>Today is '+formatDate(now)+' &bull; '+roster.daysOn+'/'+roster.daysOff+' roster</div>'
     +'<div class="alarm-status-row hidden" id="alarm-status-line"></div>';
 
   el.innerHTML=h;
@@ -1079,7 +1102,8 @@ function openPanel(){
     document.getElementById('daysOn').value='14'; document.getElementById('daysOff').value='7'; }
   populateAlarmSettings();
   populateSpotifySettings();
-  populateNotesAndChecklist();
+  populateDontForget();
+  populateNotesField();
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -1109,4 +1133,5 @@ setTimeout(function(){ render(); setInterval(render,86400000); }, msToMidnight()
 </script>
 </body>
 </html>
+
 

@@ -638,10 +638,21 @@ function isMorningActive(){
 ══════════════════════════════════════════════════════════ */
 var audioCtx=null, alarmBeepLoop=null, keepAliveInterval=null;
 var testingAlarm = false;
+var silentAudioEl = null;
 
 function getAudioCtx(){
   if(!audioCtx){ try{ audioCtx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
   return audioCtx;
+}
+
+function playSilentLoop() {
+  if (!silentAudioEl) {
+    silentAudioEl = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+    silentAudioEl.loop = true;
+  }
+  silentAudioEl.play().catch(function(e) {
+    console.warn("Silent loop autoplay blocked:", e);
+  });
 }
 
 function startKeepAlive() {
@@ -703,6 +714,11 @@ function startAlarmSound(attempt){
     alarmBeepLoop=setInterval(playAlarmPattern, 1400);
   };
 
+  // Ensure silent audio is actively playing to keep iOS audio session live
+  if (silentAudioEl) {
+    silentAudioEl.play().catch(function(){});
+  }
+
   if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
     ctx.resume().then(function() {
       playBeeps();
@@ -734,6 +750,7 @@ function enableAlarmSound() {
       ctx.resume().then(function() {
         beep(880, 0.15, 0.3);
         startKeepAlive();
+        playSilentLoop();
         updateEnableBtn();
       }).catch(function(e) {
         console.error(e);
@@ -741,6 +758,7 @@ function enableAlarmSound() {
     } else {
       beep(880, 0.15, 0.3);
       startKeepAlive();
+      playSilentLoop();
       updateEnableBtn();
     }
   }
@@ -761,6 +779,7 @@ function testAlarmSound() {
   if (testingAlarm) {
     stopAlarmSound();
   } else {
+    playSilentLoop();
     if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
       ctx.resume().then(function() {
         startKeepAlive();
@@ -785,12 +804,14 @@ function initAudioOnFirstUserGesture() {
       if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
         ctx.resume().then(function() {
           startKeepAlive();
+          playSilentLoop();
           removeListeners();
         }).catch(function() {
-          // Keep listeners so they can try again
+          playSilentLoop();
         });
       } else {
         startKeepAlive();
+        playSilentLoop();
         removeListeners();
       }
     }
@@ -840,6 +861,15 @@ function enableBedtime() {
     overlay.style.display = 'flex';
   }
   requestWakeLock();
+
+  // Explicitly activate audio pipeline and silent loop on Bedtime click gesture
+  var ctx = getAudioCtx();
+  if (ctx) {
+    ctx.resume().then(function() {
+      startKeepAlive();
+    }).catch(function(){});
+  }
+  playSilentLoop();
 }
 
 function disableBedtime() {
@@ -1092,9 +1122,7 @@ function render(){
   renderAlarmStatus();
 }
 
-/* ══════════════════════════════════════════════════════════
-   SETTINGS PANEL — menu + subpages
-══════════════════════════════════════════════════════════ */
+/* ── Settings PANEL — menu + subpages ──────────────────── */
 function openPanel(){
   renderSettingsMenu();
   document.getElementById('overlay').classList.add('open');
@@ -1219,6 +1247,17 @@ function toggleAlarm(on){
   if(lbl){ lbl.textContent=on?'ON':'OFF'; lbl.className='toggle-status'+(on?' on':''); }
   if(sub){ sub.textContent=on?('Rings at '+fmt12(alarm.time)+' daily'):'Off'; }
   if(!on){ alarmFired=false; snoozeUntilTs=null; if(snoozeTimer){clearTimeout(snoozeTimer);snoozeTimer=null;} }
+  
+  if (on) {
+    var ctx = getAudioCtx();
+    if (ctx) {
+      ctx.resume().then(function() {
+        startKeepAlive();
+      }).catch(function(){});
+    }
+    playSilentLoop();
+  }
+
   renderAlarmStatus();
 }
 
@@ -1241,6 +1280,15 @@ function saveAlarmSub(){
   alarmFired=false; snoozeUntilTs=null;
   if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
   renderAlarmStatus();
+  
+  var ctx = getAudioCtx();
+  if (ctx) {
+    ctx.resume().then(function() {
+      startKeepAlive();
+    }).catch(function(){});
+  }
+  playSilentLoop();
+
   var msg=document.getElementById('alarm-sub-msg');
   if(msg){ msg.textContent='✓ Alarm saved'; setTimeout(function(){ msg.textContent=''; },2000); }
 }

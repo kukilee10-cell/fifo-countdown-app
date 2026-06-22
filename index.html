@@ -581,7 +581,7 @@ var ALARM_KEY        = 'fifo_alarm_v1';
 var SPOTIFY_KEY      = 'fifo_spotify_v1';
 var DONT_FORGET_KEY  = 'fifo_dont_forget_v1';
 var NOTES_KEY        = 'fifo_notes_v1';
-var MORNING_KEY      = 'fifo_morning_v1';
+var QUOTE_KEY        = 'fifo_quote_v1';
 
 function loadRoster(){
   try{ var r=localStorage.getItem(ROSTER_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
@@ -615,22 +615,61 @@ function fmt12(t){
 }
 
 /* ══════════════════════════════════════════════════════════
-   MORNING MODE
+   DAILY MOTIVATIONAL QUOTES
 ══════════════════════════════════════════════════════════ */
-function getMorningState(){
-  try{ var r=localStorage.getItem(MORNING_KEY); return r?JSON.parse(r):{active:false,date:null}; }
-  catch(e){ return {active:false,date:null}; }
+var quotes = [
+  "Focus on the destination, not the distance. Every shift is one step closer to home.",
+  "Work hard in silence, let your success make the noise.",
+  "The harder the grind, the sweeter the R&R.",
+  "You're not just working a swing; you're building a future for the ones you love.",
+  "Discipline is choosing between what you want now and what you want most.",
+  "Your sweat today is your security tomorrow. Keep grinding, legend.",
+  "Today is a new opportunity to back yourself and dominate the shift.",
+  "Great things take time. Stay patient, stay focused, stay safe.",
+  "Be stronger than your strongest excuse.",
+  "The only bad shift is the one you didn't work safely. Back yourself.",
+  "Look back at how far you've come, then keep pushing forward.",
+  "Make today count. The roster keeps moving, and so do you.",
+  "Stay safe, look out for your mates, and get the job done.",
+  "Consistency turns average shifts into champion swings.",
+  "The grind might be tough, but you are tougher. Finish the swing strong."
+];
+
+function getDailyQuote() {
+  var dStr = today().toDateString();
+  try {
+    var stored = localStorage.getItem(QUOTE_KEY);
+    if (stored) {
+      var parsed = JSON.parse(stored);
+      if (parsed.date === dStr) {
+        return parsed.text;
+      }
+    }
+  } catch(e) {}
+  
+  var d = today();
+  var index = (d.getFullYear() * 37 + d.getMonth() * 12 + d.getDate()) % quotes.length;
+  var q = quotes[index];
+  
+  saveDailyQuote(q);
+  return q;
 }
-function setMorningActive(on){
-  var todayStr=today().toDateString();
-  localStorage.setItem(MORNING_KEY, JSON.stringify({active:on, date:on?todayStr:null}));
+
+function saveDailyQuote(text) {
+  try {
+    localStorage.setItem(QUOTE_KEY, JSON.stringify({
+      date: today().toDateString(),
+      text: text
+    }));
+  } catch(e) {}
 }
-function isMorningActive(){
-  var s=getMorningState();
-  if(!s.active) return false;
-  // auto-reset if it was set on a different day
-  if(s.date !== today().toDateString()){ setMorningActive(false); return false; }
-  return true;
+
+function rollNewQuote() {
+  var current = getDailyQuote();
+  var filtered = quotes.filter(function(q) { return q !== current; });
+  var next = filtered.length > 0 ? filtered[Math.floor(Math.random() * filtered.length)] : current;
+  saveDailyQuote(next);
+  render();
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -714,7 +753,6 @@ function startAlarmSound(attempt){
     alarmBeepLoop=setInterval(playAlarmPattern, 1400);
   };
 
-  // Ensure silent audio is actively playing to keep iOS audio session live
   if (silentAudioEl) {
     silentAudioEl.play().catch(function(){});
   }
@@ -804,14 +842,12 @@ function initAudioOnFirstUserGesture() {
       if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
         ctx.resume().then(function() {
           startKeepAlive();
-          playSilentLoop();
           removeListeners();
         }).catch(function() {
           playSilentLoop();
         });
       } else {
         startKeepAlive();
-        playSilentLoop();
         removeListeners();
       }
     }
@@ -862,7 +898,6 @@ function enableBedtime() {
   }
   requestWakeLock();
 
-  // Explicitly activate audio pipeline and silent loop on Bedtime click gesture
   var ctx = getAudioCtx();
   if (ctx) {
     ctx.resume().then(function() {
@@ -900,11 +935,8 @@ function triggerAlarm(){
   if(alarmFired) return;
   alarmFired=true;
   
-  // Disable Bedtime mode immediately to display the alert screen
   disableBedtime();
 
-  // Activate Morning Mode
-  setMorningActive(true);
   var now=new Date();
   document.getElementById('alarm-alert-time').textContent=
     'Alarm set for '+fmt12(loadAlarm().time)+' — '+now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
@@ -920,8 +952,6 @@ function stopAlarm(){
   alarmFired=false;
   snoozeUntilTs=null;
   if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
-  // Clear Morning Mode when user taps I'M UP
-  setMorningActive(false);
   render();
 }
 
@@ -930,7 +960,6 @@ function snoozeAlarm(){
   document.getElementById('alarm-alert').classList.remove('active');
   document.body.style.overflow='';
   alarmFired=false;
-  // Morning Mode stays active during snooze
   var alarm=loadAlarm();
   var mins=parseInt(alarm.snooze,10)||10;
   snoozeUntilTs=Date.now()+(mins*60000);
@@ -968,7 +997,6 @@ function doOpenSpotify(statusElId){
   var el   = statusElId ? document.getElementById(statusElId) : null;
   if(el){ el.textContent='Opening Spotify…'; el.className='spotify-status ok'; }
 
-  // If the page goes hidden the app opened — cancel the web fallback.
   var appOpened = false;
   function onVisibilityChange(){
     if(document.visibilityState === 'hidden'){
@@ -982,7 +1010,6 @@ function doOpenSpotify(statusElId){
   setTimeout(function(){
     document.removeEventListener('visibilitychange', onVisibilityChange);
     if(!appOpened){
-      // Spotify app did not open — fall back to web
       window.location.href = urls.web;
     }
     if(el){ setTimeout(function(){ el.textContent=''; el.className='spotify-status'; }, 2000); }
@@ -1041,16 +1068,15 @@ function render(){
 
   var h='';
 
-  // Morning Mode card
-  if(isMorningActive()){
-    h+='<div class="morning-card">'
-      +'<div class="morning-card-icon">☕</div>'
-      +'<div>'
-        +'<div class="morning-card-title">Morning Mode Active</div>'
-        +'<div class="morning-card-sub">Pre-start is coming. Get moving, mate.</div>'
-      +'</div>'
-    +'</div>';
-  }
+  // Daily Motivational Card
+  var dailyQuote = getDailyQuote();
+  h+='<div class="morning-card" onclick="rollNewQuote()" style="cursor: pointer; user-select: none;">'
+    +'<div class="morning-card-icon">💡</div>'
+    +'<div>'
+      +'<div class="morning-card-title">Daily Boost <span style="font-size: 11px; font-weight: normal; color: var(--muted); margin-left: 6px;">(Tap to cycle)</span></div>'
+      +'<div class="morning-card-sub" style="color: var(--text); font-weight: 500;">' + dailyQuote + '</div>'
+    +'</div>'
+  +'</div>';
 
   h+='<div class="hero">'
       +'<div class="hero-label">'+(isOnSwing?'Days left on swing':'Days left at home')+'</div>'
@@ -1178,7 +1204,7 @@ function openSubRoster(){
     +'<div class="p-divider"></div>'
     +'<div class="p-section-head">Roster Pattern</div>'
     +'<div class="form-group"><label for="daysOn">Days ON</label><div class="stepper"><button class="step-btn" onclick="step(\'daysOn\',-1)">−</button><input type="number" id="daysOn" min="1" max="365" value="'+onVal+'"><button class="step-btn" onclick="step(\'daysOn\',1)">+</button></div></div>'
-    +'<div class="form-group"><label for="daysOff">Days OFF</label><div class="stepper"><button class="step-btn" onclick="step(\'daysOff\',-1)">−</button><input type="number" id="daysOff" min="1" max="365" value="'+offVal+'"><button class="step-btn" onclick="step(\'daysOff\',1)">+</button></div></div>'
+    +'<div class="form-group"><label><label for="daysOff">Days OFF</label><div class="stepper"><button class="step-btn" onclick="step(\'daysOff\',-1)">−</button><input type="number" id="daysOff" min="1" max="365" value="'+offVal+'"><button class="step-btn" onclick="step(\'daysOff\',1)">+</button></div></div>'
     +'<button class="save-btn" onclick="saveRosterSub()">Save Roster</button>'
     +'<button class="clear-btn" onclick="clearRosterSub()">Clear Roster</button>';
   document.getElementById('settings-panel').innerHTML=h;
@@ -1314,7 +1340,6 @@ function openSubSpotify(){
 function testSpotifyLink(){
   var input=document.getElementById('spotify-url-input');
   var url=(input?input.value:'').trim();
-  // Temporarily save so doOpenSpotify uses this URL
   if(url) saveSpotify({url:url});
   doOpenSpotify('spotify-status');
 }
@@ -1398,7 +1423,6 @@ function step(id,delta){
   el.value=Math.max(parseInt(el.min,10)||1,Math.min(parseInt(el.max,10)||365,v+delta));
 }
 function showPanelMsg(msg){
-  // Non-blocking inline message (no alert())
   var existing=document.getElementById('_panel_err');
   if(existing) existing.remove();
   var d=document.createElement('div');
@@ -1420,20 +1444,6 @@ function showPanelMsg(msg){
     appWrap.classList.add('visible');
     setTimeout(function(){ splash.style.display='none'; },650);
   },2300);
-})();
-
-/* ══════════════════════════════════════════════════════════
-   BOOT
-══════════════════════════════════════════════════════════ */
-// Activate Morning Mode if app opened with ?morning=1
-(function(){
-  var params = new URLSearchParams(window.location.search);
-  if(params.get('morning') === '1'){
-    setMorningActive(true);
-    // Remove ?morning=1 from the address bar cleanly
-    var clean = window.location.pathname + window.location.hash;
-    history.replaceState(null, '', clean);
-  }
 })();
 
 render();

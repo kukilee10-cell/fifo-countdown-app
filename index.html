@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link rel="icon" type="image/x-icon"    href="favicon.ico">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -39,20 +39,14 @@
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    -webkit-font-smoothing: antialiased;
+    height: 100%; background: var(--bg); color: var(--text);
+    font-family: var(--sans); -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
   }
   body { display: flex; flex-direction: column; min-height: 100dvh; }
 
-  /* ─────────────────────────────────────────────────────────
-     SPLASH
-  ───────────────────────────────────────────────────────── */
+  /* ── SPLASH ─────────────────────────────────────────────── */
   #splash {
     position: fixed; inset: 0; z-index: 999; background: #0d0f12;
     display: flex; flex-direction: column; align-items: center;
@@ -129,26 +123,18 @@
     to   { filter: drop-shadow(0 0 28px rgba(245,166,35,0.55)); }
   }
 
-  /* ─────────────────────────────────────────────────────────
-     APP WRAPPER
-  ───────────────────────────────────────────────────────── */
+  /* ── APP WRAPPER ────────────────────────────────────────── */
   #app-wrapper { display: contents; opacity: 0; transition: opacity 0.45s ease; }
   #app-wrapper.visible { opacity: 1; }
 
-  /* ─────────────────────────────────────────────────────────
-     HEADER
-  ───────────────────────────────────────────────────────── */
+  /* ── HEADER ─────────────────────────────────────────────── */
   header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 20px 14px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    position: sticky; top: 0; z-index: 10;
+    padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
+    background: var(--surface); position: sticky; top: 0; z-index: 10;
   }
-  .logo {
-    font-family: var(--mono); font-size: 13px; font-weight: 500;
-    letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
-  }
+  .logo { font-family: var(--mono); font-size: 13px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
   .logo span { color: var(--muted); }
   .settings-btn {
     background: var(--card); border: 1px solid var(--border); color: var(--text);
@@ -158,22 +144,13 @@
   }
   .settings-btn:active { background: var(--border); }
 
-  /* ─────────────────────────────────────────────────────────
-     MAIN SCROLL AREA
-  ───────────────────────────────────────────────────────── */
+  /* ── MAIN SCROLL AREA ───────────────────────────────────── */
   main {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 20px 14px 60px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 20px 14px 60px; display: flex; flex-direction: column; gap: 16px;
   }
 
-  /* ─────────────────────────────────────────────────────────
-     EMPTY STATE
-  ───────────────────────────────────────────────────────── */
+  /* ── EMPTY STATE ────────────────────────────────────────── */
   .empty-state {
     display: flex; flex-direction: column; align-items: center;
     text-align: center; padding: 48px 24px 32px; gap: 14px;
@@ -189,14 +166,21 @@
   }
   .cta-btn:active { background: var(--accent-dk); transform: scale(0.98); }
 
-  /* ─────────────────────────────────────────────────────────
-     HERO COUNTDOWN
-  ───────────────────────────────────────────────────────── */
+  /* ── MORNING MODE CARD ──────────────────────────────────── */
+  .morning-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 4px solid var(--ok); border-radius: 16px;
+    padding: 16px 18px; display: flex; align-items: center; gap: 14px;
+  }
+  .morning-card-icon { font-size: 26px; flex-shrink: 0; }
+  .morning-card-title { font-size: 15px; font-weight: 700; color: var(--ok); margin-bottom: 3px; }
+  .morning-card-sub   { font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+  /* ── HERO COUNTDOWN ─────────────────────────────────────── */
   .hero {
     background: var(--card); border: 1px solid var(--border);
     border-radius: 22px; padding: 28px 20px 24px;
     text-align: center; position: relative;
-    /* subtle amber glow */
     box-shadow: 0 0 0 1px var(--border),
                 0 8px 32px rgba(245,166,35,0.08),
                 0 0 48px rgba(245,166,35,0.05);
@@ -211,13 +195,9 @@
     text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
   }
   .hero-number {
-    font-family: var(--mono);
-    /* clamp: min 72px so it's always readable; scale with viewport; max 104px */
-    font-size: clamp(72px, 20vw, 104px);
+    font-family: var(--mono); font-size: clamp(72px, 20vw, 104px);
     font-weight: 500; line-height: 1.05; color: var(--accent);
-    letter-spacing: -0.02em;
-    /* ensure the number is never clipped */
-    overflow: visible; display: block; width: 100%;
+    letter-spacing: -0.02em; overflow: visible; display: block; width: 100%;
   }
   .hero-number.danger { color: var(--danger); }
   .hero-number.done   { color: var(--ok); }
@@ -227,7 +207,6 @@
   }
   .hero-sub { margin-top: 14px; font-size: 15px; color: var(--muted); line-height: 1.5; }
   .hero-sub strong { color: var(--text); font-weight: 600; }
-
   .progress-wrap {
     margin-top: 22px; background: var(--border);
     border-radius: 99px; height: 8px; overflow: hidden;
@@ -243,16 +222,13 @@
     font-family: var(--mono); font-size: 11px; color: var(--muted);
   }
 
-  /* ─────────────────────────────────────────────────────────
-     STAT GRID
-  ───────────────────────────────────────────────────────── */
+  /* ── STAT GRID ──────────────────────────────────────────── */
   .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .stat-card {
     background: var(--card); border: 1px solid var(--border);
     border-radius: 16px; padding: 16px 14px;
   }
-  .stat-card.wide { grid-column: 1 / -1; }
-  /* Compact card for Fly-home Date — slightly less vertical padding */
+  .stat-card.wide    { grid-column: 1 / -1; }
   .stat-card.compact { padding: 12px 14px; }
   .stat-label {
     font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em;
@@ -265,14 +241,12 @@
   .stat-value.accent { color: var(--accent); }
   .stat-value.ok     { color: var(--ok); }
   .stat-value.danger { color: var(--danger); }
-  /* Date values — keep on one line */
   .stat-value.date-val {
-    font-size: 16px; white-space: nowrap; overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .stat-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-  /* Today row */
+  /* ── TODAY / ALARM STATUS ROWS ──────────────────────────── */
   .today-row {
     display: flex; align-items: center; gap: 10px;
     font-size: 14px; color: var(--muted); padding: 4px 2px;
@@ -281,10 +255,17 @@
     width: 8px; height: 8px; border-radius: 50%;
     background: var(--accent); flex-shrink: 0;
   }
+  .alarm-status-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; color: var(--muted); padding: 0 2px;
+    font-family: var(--mono);
+  }
+  .alarm-status-row .alarm-status-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    flex-shrink: 0; box-shadow: 0 0 6px rgba(245,166,35,0.6);
+  }
 
-  /* ─────────────────────────────────────────────────────────
-     FULL-SCREEN WAKE-UP ALERT
-  ───────────────────────────────────────────────────────── */
+  /* ── WAKE-UP ALERT ──────────────────────────────────────── */
   #alarm-alert {
     display: none; position: fixed; inset: 0; z-index: 9999;
     background: #0a0c0e; flex-direction: column; align-items: center;
@@ -301,7 +282,7 @@
     animation: alarmBounce 0.6s ease infinite alternate;
   }
   @keyframes alarmBounce {
-    from { transform: scale(1);    }
+    from { transform: scale(1); }
     to   { transform: scale(1.14); }
   }
   .alarm-alert-title {
@@ -311,7 +292,6 @@
   .alarm-alert-sub {
     font-size: 18px; color: var(--muted); margin-bottom: 52px; line-height: 1.5;
   }
-  /* ── I'M UP button — green ── */
   .stop-alarm-btn {
     background: var(--ok); color: #fff; border: none; border-radius: 20px;
     padding: 24px 48px; font-family: var(--sans); font-size: 21px; font-weight: 700;
@@ -324,10 +304,26 @@
     font-family: var(--mono); font-size: 14px; color: var(--muted); margin-top: 28px;
     line-height: 1.6;
   }
+  .alarm-alert-btns {
+    display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 340px;
+  }
+  .snooze-alarm-btn {
+    background: var(--card); color: var(--accent); border: 1.5px solid var(--accent);
+    border-radius: 20px; padding: 20px; font-family: var(--sans); font-size: 18px;
+    font-weight: 700; cursor: pointer; letter-spacing: 0.02em; min-height: 62px;
+    width: 100%; transition: background 0.15s, transform 0.1s;
+  }
+  .snooze-alarm-btn:active { background: rgba(245,166,35,0.1); transform: scale(0.96); }
+  .alarm-spotify-btn {
+    background: var(--spotify); color: #000; border: none;
+    border-radius: 20px; padding: 20px; font-family: var(--sans); font-size: 18px;
+    font-weight: 700; cursor: pointer; letter-spacing: 0.02em; min-height: 62px;
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .alarm-spotify-btn:active { background: var(--spotify-dk); transform: scale(0.96); }
 
-  /* ─────────────────────────────────────────────────────────
-     ROSTER SETTINGS OVERLAY
-  ───────────────────────────────────────────────────────── */
+  /* ── SETTINGS OVERLAY ───────────────────────────────────── */
   .overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.72); z-index: 100; align-items: flex-end;
@@ -347,6 +343,30 @@
     font-size: 20px; font-weight: 700; padding: 0 22px 20px;
     border-bottom: 1px solid var(--border); margin-bottom: 22px;
   }
+
+  /* ── SETTINGS MENU (main list) ──────────────────────────── */
+  .settings-menu-btn {
+    display: flex; align-items: center; width: 100%; padding: 18px 22px;
+    background: none; border: none; border-bottom: 1px solid var(--border);
+    color: var(--text); font-family: var(--sans); font-size: 17px; font-weight: 600;
+    cursor: pointer; gap: 14px; text-align: left; transition: background 0.12s;
+  }
+  .settings-menu-btn:active { background: rgba(255,255,255,0.04); }
+  .settings-menu-btn .smb-icon { font-size: 22px; flex-shrink: 0; width: 28px; text-align: center; }
+  .settings-menu-btn .smb-chev { margin-left: auto; color: var(--muted); font-size: 20px; }
+  .settings-menu-btn .smb-sub  { font-size: 13px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+  .smb-label-wrap { display: flex; flex-direction: column; }
+
+  /* ── SETTINGS SUBPANEL ──────────────────────────────────── */
+  .sub-back-btn {
+    display: flex; align-items: center; gap: 8px; background: none; border: none;
+    color: var(--accent); font-family: var(--sans); font-size: 16px; font-weight: 600;
+    padding: 0 22px 18px; cursor: pointer; margin-top: -6px;
+  }
+  .sub-back-btn:active { opacity: 0.7; }
+  .sub-back-btn::before { content: '‹'; font-size: 22px; line-height: 1; }
+
+  /* ── FORM ELEMENTS ──────────────────────────────────────── */
   .form-group { padding: 0 22px; margin-bottom: 22px; }
   label {
     display: block; font-size: 12px; font-weight: 600; color: var(--muted);
@@ -362,7 +382,6 @@
   input[type="date"]:focus, input[type="number"]:focus { border-color: var(--accent); }
   input[type="number"]  { -moz-appearance: textfield; }
   input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; }
-
   .stepper { display: flex; align-items: center; gap: 12px; }
   .stepper input { flex: 1; text-align: center; }
   .step-btn {
@@ -380,7 +399,6 @@
     cursor: pointer; min-height: 58px; transition: background 0.15s, transform 0.1s;
   }
   .save-btn:active { background: var(--accent-dk); transform: scale(0.98); }
-
   .clear-btn {
     display: block; width: calc(100% - 44px); margin: 14px 22px 0;
     background: transparent; color: var(--danger); border: 1.5px solid var(--danger);
@@ -394,10 +412,6 @@
     font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
     text-transform: uppercase; color: var(--muted); padding: 0 22px 12px;
   }
-
-  /* ─────────────────────────────────────────────────────────
-     SETTINGS PANEL — ALARM + SPOTIFY SECTIONS
-  ───────────────────────────────────────────────────────── */
   .panel-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 22px; margin-bottom: 18px;
@@ -405,17 +419,14 @@
   .panel-row-label { font-size: 15px; font-weight: 600; color: var(--text); }
   .panel-row-sub   { font-size: 13px; color: var(--muted); margin-top: 2px; }
 
-  .toggle-status {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em;
-    color: var(--muted); min-width: 28px; text-align: right;
-  }
+  /* ── TOGGLE SWITCH ──────────────────────────────────────── */
+  .toggle-status { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em;
+    color: var(--muted); min-width: 28px; text-align: right; }
   .toggle-status.on { color: var(--accent); }
   .toggle { position: relative; width: 54px; height: 30px; flex-shrink: 0; cursor: pointer; }
   .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-track {
-    position: absolute; inset: 0; background: var(--border);
-    border-radius: 99px; transition: background 0.2s;
-  }
+  .toggle-track { position: absolute; inset: 0; background: var(--border);
+    border-radius: 99px; transition: background 0.2s; }
   .toggle input:checked + .toggle-track { background: var(--accent); }
   .toggle-thumb {
     position: absolute; top: 4px; left: 4px; width: 22px; height: 22px;
@@ -425,6 +436,7 @@
   .toggle input:checked ~ .toggle-thumb { transform: translateX(24px); }
   .toggle-inline { display: flex; align-items: center; gap: 10px; }
 
+  /* ── TIME + SNOOZE ──────────────────────────────────────── */
   .time-input {
     width: 100%; background: var(--card); border: 1.5px solid var(--border);
     border-radius: 14px; color: var(--text); font-family: var(--mono);
@@ -433,8 +445,6 @@
     -webkit-appearance: none; text-align: center;
   }
   .time-input:focus { border-color: var(--accent); }
-
-  /* Snooze pill selector */
   .snooze-pills { display: flex; gap: 10px; }
   .snooze-pill {
     flex: 1; background: var(--card); border: 1.5px solid var(--border);
@@ -443,11 +453,16 @@
     cursor: pointer; text-align: center; min-height: 50px;
     transition: background 0.15s, border-color 0.15s, color 0.15s;
   }
-  .snooze-pill.active {
-    background: rgba(245,166,35,0.12); border-color: var(--accent); color: var(--accent);
+  .snooze-pill.active { background: rgba(245,166,35,0.12); border-color: var(--accent); color: var(--accent); }
+  .panel-save-btn {
+    display: block; width: calc(100% - 44px); margin: 4px 22px 0;
+    background: var(--accent); color: #000; border: none; border-radius: 14px;
+    padding: 17px; font-family: var(--sans); font-size: 16px; font-weight: 700;
+    cursor: pointer; min-height: 54px; transition: background 0.15s, transform 0.1s;
   }
+  .panel-save-btn:active { background: var(--accent-dk); transform: scale(0.98); }
 
-  /* Spotify input + buttons inside panel */
+  /* ── SPOTIFY ────────────────────────────────────────────── */
   .spotify-url-input {
     width: 100%; background: var(--card); border: 1.5px solid var(--border);
     border-radius: 14px; color: var(--text); font-family: var(--mono);
@@ -456,7 +471,6 @@
   }
   .spotify-url-input:focus { border-color: var(--spotify); }
   .spotify-url-input::placeholder { color: var(--muted); }
-
   .spotify-test-btn {
     width: 100%; background: transparent; color: var(--spotify);
     border: 1.5px solid var(--spotify); border-radius: 14px; padding: 15px;
@@ -464,7 +478,8 @@
     cursor: pointer; min-height: 52px; transition: background 0.15s;
   }
   .spotify-test-btn:active { background: rgba(29,185,84,0.1); }
-
+  .panel-save-btn.spotify-save { background: var(--spotify); color: #000; }
+  .panel-save-btn.spotify-save:active { background: var(--spotify-dk); }
   .spotify-status {
     font-size: 13px; color: var(--muted); text-align: center;
     font-family: var(--mono); letter-spacing: 0.04em; min-height: 20px; margin-top: 4px;
@@ -472,26 +487,12 @@
   .spotify-status.ok  { color: var(--spotify); }
   .spotify-status.err { color: var(--danger); }
 
-  .panel-save-btn {
-    display: block; width: calc(100% - 44px); margin: 4px 22px 0;
-    background: var(--accent); color: #000; border: none; border-radius: 14px;
-    padding: 17px; font-family: var(--sans); font-size: 16px; font-weight: 700;
-    cursor: pointer; min-height: 54px; transition: background 0.15s, transform 0.1s;
-  }
-  .panel-save-btn:active { background: var(--accent-dk); transform: scale(0.98); }
-  .panel-save-btn.spotify-save {
-    background: var(--spotify); color: #000;
-  }
-  .panel-save-btn.spotify-save:active { background: var(--spotify-dk); }
-
-  /* ─────────────────────────────────────────────────────────
-     NOTES & DON'T FORGET — panel textareas
-  ───────────────────────────────────────────────────────── */
+  /* ── NOTES / DON'T FORGET TEXTAREAS ────────────────────── */
   .panel-textarea {
     width: 100%; background: var(--card); border: 1.5px solid var(--border);
     border-radius: 14px; color: var(--text); font-family: var(--sans);
     font-size: 15px; line-height: 1.6; padding: 16px;
-    outline: none; resize: vertical; min-height: 140px;
+    outline: none; resize: vertical; min-height: 160px;
     transition: border-color 0.15s;
   }
   .panel-textarea:focus { border-color: var(--accent); }
@@ -505,43 +506,6 @@
   }
   .panel-save-notes-btn:active { background: var(--border); transform: scale(0.98); }
   .panel-save-notes-btn.saved { border-color: var(--ok); color: var(--ok); }
-
-  /* ─────────────────────────────────────────────────────────
-     MAIN SCREEN — small alarm status line
-  ───────────────────────────────────────────────────────── */
-  .alarm-status-row {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 14px; color: var(--muted); padding: 0 2px;
-    font-family: var(--mono);
-  }
-  .alarm-status-row .alarm-status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent); flex-shrink: 0;
-    box-shadow: 0 0 6px rgba(245,166,35,0.6);
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     WAKE-UP ALERT — 3-button layout
-  ───────────────────────────────────────────────────────── */
-  .alarm-alert-btns {
-    display: flex; flex-direction: column; gap: 14px;
-    width: 100%; max-width: 340px;
-  }
-  .snooze-alarm-btn {
-    background: var(--card); color: var(--accent); border: 1.5px solid var(--accent);
-    border-radius: 20px; padding: 20px; font-family: var(--sans); font-size: 18px;
-    font-weight: 700; cursor: pointer; letter-spacing: 0.02em; min-height: 62px;
-    width: 100%; transition: background 0.15s, transform 0.1s;
-  }
-  .snooze-alarm-btn:active { background: rgba(245,166,35,0.1); transform: scale(0.96); }
-  .alarm-spotify-btn {
-    background: var(--spotify); color: #000; border: none;
-    border-radius: 20px; padding: 20px; font-family: var(--sans); font-size: 18px;
-    font-weight: 700; cursor: pointer; letter-spacing: 0.02em; min-height: 62px;
-    width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
-    transition: background 0.15s, transform 0.1s;
-  }
-  .alarm-spotify-btn:active { background: var(--spotify-dk); transform: scale(0.96); }
 
   .hidden { display: none !important; }
 </style>
@@ -585,135 +549,30 @@
 
 <header>
   <div class="logo">FIFO <span>// Countdown</span></div>
-  <button class="settings-btn" onclick="openPanel()">⚙&nbsp; Roster</button>
+  <button class="settings-btn" onclick="openPanel()">⚙&nbsp; Settings</button>
 </header>
 
 <main id="main-content"></main>
 
-<!-- Roster / Settings panel -->
+<!-- ══ SETTINGS OVERLAY ════════════════════════════════════ -->
 <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
-  <div class="panel">
-    <div class="panel-handle"></div>
-    <div class="panel-title">My Roster</div>
-    <div class="p-section-head">Swing Start Date</div>
-    <div class="form-group">
-      <label for="startDate">First day on site</label>
-      <input type="date" id="startDate">
-    </div>
-    <div class="p-divider"></div>
-    <div class="p-section-head">Roster Pattern</div>
-    <div class="form-group">
-      <label for="daysOn">Days ON</label>
-      <div class="stepper">
-        <button class="step-btn" onclick="step('daysOn',-1)">−</button>
-        <input type="number" id="daysOn" min="1" max="365" value="14">
-        <button class="step-btn" onclick="step('daysOn',1)">+</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="daysOff">Days OFF</label>
-      <div class="stepper">
-        <button class="step-btn" onclick="step('daysOff',-1)">−</button>
-        <input type="number" id="daysOff" min="1" max="365" value="7">
-        <button class="step-btn" onclick="step('daysOff',1)">+</button>
-      </div>
-    </div>
-    <button class="save-btn" onclick="saveAndClose()">Save Roster</button>
-    <button class="clear-btn" onclick="clearRoster()">Clear Roster</button>
-
-    <div class="p-divider" style="margin-top:30px;"></div>
-    <div class="p-section-head">⏰ Wake-Up Alarm</div>
-
-    <div class="panel-row">
-      <div>
-        <div class="panel-row-label">Alarm</div>
-        <div class="panel-row-sub" id="alarm-toggle-sub">Off</div>
-      </div>
-      <div class="toggle-inline">
-        <span class="toggle-status" id="alarm-toggle-label">OFF</span>
-        <label class="toggle">
-          <input type="checkbox" id="alarm-toggle" onchange="toggleAlarm(this.checked)">
-          <div class="toggle-track"></div>
-          <div class="toggle-thumb"></div>
-        </label>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="alarm-time-input">Wake-up time</label>
-      <input type="time" class="time-input" id="alarm-time-input" value="06:00">
-    </div>
-
-    <div class="form-group">
-      <label>Snooze duration</label>
-      <div class="snooze-pills" id="snooze-pills">
-        <button type="button" class="snooze-pill" data-min="5"  onclick="selectSnooze(5)">5 min</button>
-        <button type="button" class="snooze-pill" data-min="10" onclick="selectSnooze(10)">10 min</button>
-        <button type="button" class="snooze-pill" data-min="15" onclick="selectSnooze(15)">15 min</button>
-      </div>
-    </div>
-
-    <button class="panel-save-btn" onclick="saveAlarmSettings()">Save Alarm</button>
-
-    <div class="p-divider" style="margin-top:30px;"></div>
-    <div class="p-section-head">🎵 Spotify</div>
-
-    <div class="form-group" style="margin-bottom:14px;">
-      <label for="spotify-url-input">Playlist, album, or track link</label>
-      <input type="url" class="spotify-url-input" id="spotify-url-input"
-        placeholder="https://open.spotify.com/playlist/…" oninput="clearSpotifyStatus()">
-    </div>
-
-    <div class="form-group" style="margin-bottom:14px;">
-      <button class="spotify-test-btn" onclick="testSpotify()">🔍 Test Spotify Link</button>
-    </div>
-
-    <button class="panel-save-btn spotify-save" onclick="saveSpotifyUrl()">💾 Save Spotify Link</button>
-    <div class="spotify-status" id="spotify-status" style="padding:0 22px;margin-top:10px;"></div>
-
-    <div class="p-divider" style="margin-top:30px;"></div>
-    <div class="p-section-head">📌 Don't Forget List</div>
-
-    <div class="form-group" style="margin-bottom:10px;">
-      <textarea id="dont-forget-textarea" class="panel-textarea"
-        placeholder="• Flight check-in&#10;• Site access card&#10;• Chargers&#10;• Medications&#10;• Don't get lost"
-        oninput="autosaveDontForget()"></textarea>
-    </div>
-    <button class="panel-save-notes-btn" id="dont-forget-save-btn" onclick="saveDontForget()">💾 Save List</button>
-
-    <div class="p-divider" style="margin-top:26px;"></div>
-    <div class="p-section-head">📝 Notes</div>
-
-    <div class="form-group" style="margin-bottom:10px;">
-      <textarea id="notes-textarea" class="panel-textarea"
-        placeholder="Notes for this swing…"
-        oninput="autosaveNotes()"></textarea>
-    </div>
-    <button class="panel-save-notes-btn" id="notes-save-btn" onclick="saveNotes()">💾 Save Notes</button>
-
+  <div class="panel" id="settings-panel">
+    <!-- injected by JS -->
   </div>
 </div>
 
 </div><!-- #app-wrapper -->
 
 <script>
-/* ── SPLASH ──────────────────────────────────────────────── */
-(function(){
-  var splash  = document.getElementById('splash');
-  var appWrap = document.getElementById('app-wrapper');
-  setTimeout(function(){
-    splash.classList.add('fade-out');
-    appWrap.classList.add('visible');
-    setTimeout(function(){ splash.style.display='none'; }, 650);
-  }, 2300);
-})();
-
-/* ── STORAGE ─────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   STORAGE
+══════════════════════════════════════════════════════════ */
 var ROSTER_KEY       = 'fifo_roster_v1';
 var ALARM_KEY        = 'fifo_alarm_v1';
 var SPOTIFY_KEY      = 'fifo_spotify_v1';
 var DONT_FORGET_KEY  = 'fifo_dont_forget_v1';
 var NOTES_KEY        = 'fifo_notes_v1';
+var MORNING_KEY      = 'fifo_morning_v1';
 
 function loadRoster(){
   try{ var r=localStorage.getItem(ROSTER_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
@@ -732,7 +591,9 @@ function loadSpotify(){
 }
 function saveSpotify(d){ localStorage.setItem(SPOTIFY_KEY,JSON.stringify(d)); }
 
-/* ── DATE HELPERS ────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   DATE HELPERS
+══════════════════════════════════════════════════════════ */
 function today(){ var d=new Date(); d.setHours(0,0,0,0); return d; }
 function parseDate(s){ var p=s.split('-').map(Number); return new Date(p[0],p[1]-1,p[2]); }
 function formatDate(d){ return d.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'}); }
@@ -744,47 +605,84 @@ function fmt12(t){
   h=h%12||12; return h+':'+m+' '+ap;
 }
 
-/* ── ALARM AUDIO ─────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   MORNING MODE
+══════════════════════════════════════════════════════════ */
+function getMorningState(){
+  try{ var r=localStorage.getItem(MORNING_KEY); return r?JSON.parse(r):{active:false,date:null}; }
+  catch(e){ return {active:false,date:null}; }
+}
+function setMorningActive(on){
+  var todayStr=today().toDateString();
+  localStorage.setItem(MORNING_KEY, JSON.stringify({active:on, date:on?todayStr:null}));
+}
+function isMorningActive(){
+  var s=getMorningState();
+  if(!s.active) return false;
+  // auto-reset if it was set on a different day
+  if(s.date !== today().toDateString()){ setMorningActive(false); return false; }
+  return true;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ALARM AUDIO  — loud beep-beep-beep pattern
+══════════════════════════════════════════════════════════ */
 var audioCtx=null, alarmBeepLoop=null;
 
 function getAudioCtx(){
   if(!audioCtx){ try{ audioCtx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
   return audioCtx;
 }
-function beep(freq,dur,vol){
+function beep(freq,dur,vol,when){
   var ctx=getAudioCtx(); if(!ctx) return;
   try{
     var o=ctx.createOscillator(), g=ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
-    o.type='square'; o.frequency.setValueAtTime(freq,ctx.currentTime);
-    g.gain.setValueAtTime(vol||0.3,ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
-    o.start(ctx.currentTime); o.stop(ctx.currentTime+dur);
+    o.type='square'; o.frequency.setValueAtTime(freq, when||ctx.currentTime);
+    g.gain.setValueAtTime(vol||0.5, when||ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,(when||ctx.currentTime)+dur);
+    o.start(when||ctx.currentTime); o.stop((when||ctx.currentTime)+dur+0.01);
   }catch(e){}
 }
 function playAlarmPattern(){
-  beep(880,0.12,0.4);
-  setTimeout(function(){ beep(880,0.12,0.4); },160);
-  setTimeout(function(){ beep(1100,0.25,0.45); },320);
+  /* Three sharp blasts at high volume */
+  var ctx=getAudioCtx(); if(!ctx) return;
+  var t=ctx.currentTime;
+  beep(1046,0.14,0.7,t);
+  beep(1046,0.14,0.7,t+0.20);
+  beep(1046,0.14,0.7,t+0.40);
+  beep(1318,0.30,0.75,t+0.65);
 }
-function startAlarmSound(){ stopAlarmSound(); playAlarmPattern(); alarmBeepLoop=setInterval(playAlarmPattern,1200); }
-function stopAlarmSound(){ if(alarmBeepLoop){ clearInterval(alarmBeepLoop); alarmBeepLoop=null; } }
+function startAlarmSound(){
+  stopAlarmSound();
+  playAlarmPattern();
+  alarmBeepLoop=setInterval(playAlarmPattern, 1400);
+}
+function stopAlarmSound(){
+  if(alarmBeepLoop){ clearInterval(alarmBeepLoop); alarmBeepLoop=null; }
+}
 
-/* ── ALARM TRIGGER / STOP / SNOOZE ───────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   ALARM TRIGGER / STOP / SNOOZE
+══════════════════════════════════════════════════════════ */
 var alarmFired    = false;
 var snoozeTimer   = null;
 var snoozeUntilTs = null;
 
 function triggerAlarm(){
-  if(alarmFired) return; alarmFired=true;
-  var now=new Date(), alertEl=document.getElementById('alarm-alert');
+  if(alarmFired) return;
+  alarmFired=true;
+  // Activate Morning Mode
+  setMorningActive(true);
+  var now=new Date();
   document.getElementById('alarm-alert-time').textContent=
     'Alarm set for '+fmt12(loadAlarm().time)+' — '+now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
-  alertEl.classList.add('active');
+  document.getElementById('alarm-alert').classList.add('active');
   document.body.style.overflow='hidden';
   var ctx=getAudioCtx();
   if(ctx&&ctx.state==='suspended'){ ctx.resume().then(startAlarmSound); } else { startAlarmSound(); }
 }
+
 function stopAlarm(){
   stopAlarmSound();
   document.getElementById('alarm-alert').classList.remove('active');
@@ -792,12 +690,17 @@ function stopAlarm(){
   alarmFired=false;
   snoozeUntilTs=null;
   if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
+  // Clear Morning Mode when user taps I'M UP
+  setMorningActive(false);
+  render();
 }
+
 function snoozeAlarm(){
   stopAlarmSound();
   document.getElementById('alarm-alert').classList.remove('active');
   document.body.style.overflow='';
   alarmFired=false;
+  // Morning Mode stays active during snooze
   var alarm=loadAlarm();
   var mins=parseInt(alarm.snooze,10)||10;
   snoozeUntilTs=Date.now()+(mins*60000);
@@ -807,6 +710,7 @@ function snoozeAlarm(){
     triggerAlarm();
   }, mins*60000);
 }
+
 function checkAlarm(){
   if(snoozeUntilTs) return;
   var alarm=loadAlarm(); if(!alarm.on||!alarm.time) return;
@@ -817,181 +721,50 @@ function checkAlarm(){
 }
 setInterval(checkAlarm,10000);
 
-/* ── ALARM SETTINGS (lives inside Settings panel) ────────── */
-function populateAlarmSettings(){
-  var alarm=loadAlarm();
-  var toggle=document.getElementById('alarm-toggle');
-  var lbl=document.getElementById('alarm-toggle-label');
-  var sub=document.getElementById('alarm-toggle-sub');
-  var timeInput=document.getElementById('alarm-time-input');
-  if(!toggle) return;
-  toggle.checked=!!alarm.on;
-  lbl.textContent=alarm.on?'ON':'OFF';
-  lbl.className='toggle-status'+(alarm.on?' on':'');
-  sub.textContent=alarm.on?('Rings at '+fmt12(alarm.time)+' daily'):'Off';
-  timeInput.value=alarm.time||'06:00';
-  var mins=parseInt(alarm.snooze,10)||10;
-  document.querySelectorAll('.snooze-pill').forEach(function(p){
-    p.classList.toggle('active', parseInt(p.dataset.min,10)===mins);
-  });
+/* ══════════════════════════════════════════════════════════
+   SPOTIFY DEEP LINK
+══════════════════════════════════════════════════════════ */
+function buildSpotifyUrls(rawUrl){
+  var web = (rawUrl||'').trim() || 'https://open.spotify.com';
+  var app = 'spotify://';
+  var m   = web.match(/open\.spotify\.com\/(track|album|playlist|artist|show|episode)\/([A-Za-z0-9]+)/);
+  if(m){ app = 'spotify:' + m[1] + ':' + m[2]; }
+  return {app:app, web:web};
 }
 
-function toggleAlarm(on){
-  var alarm=loadAlarm(); alarm.on=on; saveAlarm(alarm);
-  var lbl=document.getElementById('alarm-toggle-label');
-  var sub=document.getElementById('alarm-toggle-sub');
-  lbl.textContent=on?'ON':'OFF'; lbl.className='toggle-status'+(on?' on':'');
-  sub.textContent=on?('Rings at '+fmt12(alarm.time)+' daily'):'Off';
-  if(!on){ alarmFired=false; snoozeUntilTs=null; if(snoozeTimer){clearTimeout(snoozeTimer);snoozeTimer=null;} }
-  renderAlarmStatus();
+function doOpenSpotify(statusElId){
+  var sp     = loadSpotify();
+  var urls   = buildSpotifyUrls(sp.url);
+  var el     = statusElId ? document.getElementById(statusElId) : null;
+  if(el){ el.textContent='Opening Spotify…'; el.className='spotify-status ok'; }
+  var t = Date.now();
+  window.location.href = urls.app;
+  setTimeout(function(){
+    if(Date.now()-t < 1800){ window.location.href = urls.web; }
+    if(el){ setTimeout(function(){ el.textContent=''; el.className='spotify-status'; },2000); }
+  }, 1200);
 }
 
-function selectSnooze(mins){
-  document.querySelectorAll('.snooze-pill').forEach(function(p){
-    p.classList.toggle('active', parseInt(p.dataset.min,10)===mins);
-  });
-  var alarm=loadAlarm(); alarm.snooze=mins; saveAlarm(alarm);
-}
+function openSpotify(){ doOpenSpotify(null); }
 
-function saveAlarmSettings(){
-  var t=document.getElementById('alarm-time-input').value;
-  if(!t){ alert('Please pick a wake-up time.'); return; }
-  var alarm=loadAlarm();
-  alarm.time=t;
-  alarm.on=document.getElementById('alarm-toggle').checked;
-  var activePill=document.querySelector('.snooze-pill.active');
-  alarm.snooze=activePill?parseInt(activePill.dataset.min,10):(alarm.snooze||10);
-  saveAlarm(alarm);
-  alarmFired=false; snoozeUntilTs=null;
-  if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
-  document.getElementById('alarm-toggle-sub').textContent=alarm.on?('Rings at '+fmt12(t)+' daily'):'Off';
-  beep(660,0.1,0.25); setTimeout(function(){ beep(880,0.15,0.3); },120);
-  renderAlarmStatus();
-}
-
-/* Small status line shown only on the main screen when alarm is ON */
+/* ══════════════════════════════════════════════════════════
+   ALARM STATUS LINE (main screen)
+══════════════════════════════════════════════════════════ */
 function renderAlarmStatus(){
   var el=document.getElementById('alarm-status-line');
   if(!el) return;
   var alarm=loadAlarm();
-  if(alarm.on && alarm.time){
-    el.innerHTML='<div class="alarm-status-dot"></div>Alarm set: '+fmt12(alarm.time)+' &middot; Snooze: '+(alarm.snooze||10)+' min';
+  if(alarm.on&&alarm.time){
+    el.innerHTML='<div class="alarm-status-dot"></div>Alarm: '+fmt12(alarm.time)+' &middot; Snooze: '+(alarm.snooze||10)+' min';
     el.classList.remove('hidden');
   } else {
     el.innerHTML=''; el.classList.add('hidden');
   }
 }
 
-/* ── SPOTIFY SETTINGS (lives inside Settings panel) ──────── */
-function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function populateSpotifySettings(){
-  var sp=loadSpotify();
-  var input=document.getElementById('spotify-url-input');
-  if(input) input.value=sp.url||'';
-  if(sp.url && !localStorage.getItem('spotifyLink')){
-    localStorage.setItem('spotifyLink', sp.url);
-  }
-  var s=document.getElementById('spotify-status');
-  if(s){ s.textContent=''; s.className='spotify-status'; }
-}
-
-function clearSpotifyStatus(){
-  var s=document.getElementById('spotify-status');
-  if(s){ s.textContent=''; s.className='spotify-status'; }
-}
-
-function saveSpotifyUrl(){
-  var input=document.getElementById('spotify-url-input');
-  var url=(input?input.value:'').trim();
-  saveSpotify({url:url});
-  localStorage.setItem('spotifyLink', url);
-  var s=document.getElementById('spotify-status');
-  if(s){
-    s.textContent=url?'✓ Saved':'Cleared'; s.className=url?'spotify-status ok':'spotify-status';
-    setTimeout(function(){ s.textContent=''; s.className='spotify-status'; },2500);
-  }
-}
-
-/* ── SPOTIFY DEEP LINK OPEN ──────────────────────────────── */
-function openSpotifyLink(){
-  var input   = document.getElementById('spotify-url-input');
-  var typed   = (input ? input.value : '').trim();
-  var savedUrl = typed || localStorage.getItem('spotifyLink') || (loadSpotify().url || '');
-  var webUrl  = savedUrl.trim() || 'https://open.spotify.com';
-  var appUrl  = 'spotify://';
-  var match   = webUrl.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
-  if(match){ appUrl = 'spotify:' + match[1] + ':' + match[2]; }
-  var s = document.getElementById('spotify-status');
-  if(s){ s.textContent='Opening Spotify…'; s.className='spotify-status ok'; }
-  var start = Date.now();
-  window.location.href = appUrl;
-  setTimeout(function(){
-    if(Date.now() - start < 2000){ window.location.href = webUrl; }
-    if(s){ setTimeout(function(){ s.textContent=''; s.className='spotify-status'; },1800); }
-  }, 1200);
-}
-function openSpotify(){ openSpotifyLink(); }
-function testSpotify(){
-  alert("Test button pressed");
-  window.location.href = "spotify://";
-}
-
-/* ── DON'T FORGET LIST ───────────────────────────────────── */
-var dontForgetAutosaveTimer = null;
-
-function populateDontForget(){
-  var ta = document.getElementById('dont-forget-textarea');
-  if(!ta) return;
-  var saved = localStorage.getItem(DONT_FORGET_KEY);
-  if(saved !== null){ ta.value = saved; }
-}
-
-function autosaveDontForget(){
-  if(dontForgetAutosaveTimer) clearTimeout(dontForgetAutosaveTimer);
-  dontForgetAutosaveTimer = setTimeout(function(){ saveDontForget(true); }, 800);
-}
-
-function saveDontForget(silent){
-  var ta  = document.getElementById('dont-forget-textarea');
-  var btn = document.getElementById('dont-forget-save-btn');
-  if(!ta) return;
-  localStorage.setItem(DONT_FORGET_KEY, ta.value);
-  if(!silent && btn){
-    btn.textContent = '✓ Saved';
-    btn.classList.add('saved');
-    setTimeout(function(){ btn.textContent = '💾 Save List'; btn.classList.remove('saved'); }, 1800);
-  }
-}
-
-/* ── NOTES ───────────────────────────────────────────────── */
-var notesAutosaveTimer = null;
-
-function populateNotesField(){
-  var ta = document.getElementById('notes-textarea');
-  if(!ta) return;
-  var saved = localStorage.getItem(NOTES_KEY);
-  if(saved !== null){ ta.value = saved; }
-}
-
-function autosaveNotes(){
-  if(notesAutosaveTimer) clearTimeout(notesAutosaveTimer);
-  notesAutosaveTimer = setTimeout(function(){ saveNotes(true); }, 800);
-}
-
-function saveNotes(silent){
-  var ta  = document.getElementById('notes-textarea');
-  var btn = document.getElementById('notes-save-btn');
-  if(!ta) return;
-  localStorage.setItem(NOTES_KEY, ta.value);
-  if(!silent && btn){
-    btn.textContent = '✓ Saved';
-    btn.classList.add('saved');
-    setTimeout(function(){ btn.textContent = '💾 Save Notes'; btn.classList.remove('saved'); }, 1800);
-  }
-}
-
-/* ── MAIN RENDER ─────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   MAIN RENDER
+══════════════════════════════════════════════════════════ */
 function render(){
   var roster=loadRoster(), el=document.getElementById('main-content');
 
@@ -1022,8 +795,20 @@ function render(){
   var heroNum=isOnSwing?daysLeft:offLeft;
   var hc=isOnSwing?(daysLeft<=2?'danger':''):'ok';
 
-  var h=
-    '<div class="hero">'
+  var h='';
+
+  // Morning Mode card
+  if(isMorningActive()){
+    h+='<div class="morning-card">'
+      +'<div class="morning-card-icon">☕</div>'
+      +'<div>'
+        +'<div class="morning-card-title">Morning Mode Active</div>'
+        +'<div class="morning-card-sub">Pre-start is coming. Get moving, mate.</div>'
+      +'</div>'
+    +'</div>';
+  }
+
+  h+='<div class="hero">'
       +'<div class="hero-label">'+(isOnSwing?'Days left on swing':'Days left at home')+'</div>'
       +'<div class="hero-number '+hc+'">'+heroNum+'</div>'
       +'<div class="hero-unit">'+(heroNum===1?'day':'days')+'</div>'
@@ -1085,7 +870,7 @@ function render(){
       +'</div>';
   }
 
-  h+='</div>'  // end stat-grid
+  h+='</div>'
     +'<div class="today-row"><div class="today-dot"></div>Today is '+formatDate(now)+' &bull; '+roster.daysOn+'/'+roster.daysOff+' roster</div>'
     +'<div class="alarm-status-row hidden" id="alarm-status-line"></div>';
 
@@ -1093,45 +878,285 @@ function render(){
   renderAlarmStatus();
 }
 
-/* ── ROSTER PANEL ────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   SETTINGS PANEL — menu + subpages
+══════════════════════════════════════════════════════════ */
 function openPanel(){
-  var r=loadRoster();
-  if(r){ document.getElementById('startDate').value=r.startDate; document.getElementById('daysOn').value=r.daysOn; document.getElementById('daysOff').value=r.daysOff; }
-  else{ var d=new Date(), pad=function(n){return String(n).padStart(2,'0');};
-    document.getElementById('startDate').value=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
-    document.getElementById('daysOn').value='14'; document.getElementById('daysOff').value='7'; }
-  populateAlarmSettings();
-  populateSpotifySettings();
-  populateDontForget();
-  populateNotesField();
+  renderSettingsMenu();
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow='hidden';
 }
-function closePanel(){ document.getElementById('overlay').classList.remove('open'); document.body.style.overflow=''; }
-function handleOverlayClick(e){ if(e.target===document.getElementById('overlay')) closePanel(); }
-function saveAndClose(){
+function closePanel(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function handleOverlayClick(e){
+  if(e.target===document.getElementById('overlay')) closePanel();
+}
+
+/* ── Main menu ─────────────────────────────────────────── */
+function renderSettingsMenu(){
+  var alarm=loadAlarm();
+  var alarmSub=alarm.on?('Alarm on · '+fmt12(alarm.time)):'Alarm off';
+  var sp=loadSpotify();
+  var spSub=sp.url?'Link saved':'No link saved';
+
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">Settings</div>'
+    +menuBtn('📅','Roster','Swing dates &amp; pattern','openSubRoster()')
+    +menuBtn('⏰','Alarm',alarmSub,'openSubAlarm()')
+    +menuBtn('🎵','Spotify',spSub,'openSubSpotify()')
+    +menuBtn('📌',"Don't Forget List",'Packing &amp; check-in list','openSubDontForget()')
+    +menuBtn('📝','Notes','Swing notes','openSubNotes()');
+  document.getElementById('settings-panel').innerHTML=h;
+}
+
+function menuBtn(icon,label,sub,onclick){
+  return '<button class="settings-menu-btn" onclick="'+onclick+'">'
+    +'<span class="smb-icon">'+icon+'</span>'
+    +'<span class="smb-label-wrap"><span>'+label+'</span><span class="smb-sub">'+sub+'</span></span>'
+    +'<span class="smb-chev">›</span>'
+  +'</button>';
+}
+
+/* ── Roster subpage ────────────────────────────────────── */
+function openSubRoster(){
+  var r=loadRoster();
+  var startVal='', onVal='14', offVal='7';
+  if(r){ startVal=r.startDate; onVal=r.daysOn; offVal=r.daysOff; }
+  else { var d=new Date(), pad=function(n){return String(n).padStart(2,'0');}; startVal=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">📅 Roster</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="p-section-head">Swing Start Date</div>'
+    +'<div class="form-group"><label for="startDate">First day on site</label><input type="date" id="startDate" value="'+startVal+'"></div>'
+    +'<div class="p-divider"></div>'
+    +'<div class="p-section-head">Roster Pattern</div>'
+    +'<div class="form-group"><label for="daysOn">Days ON</label><div class="stepper"><button class="step-btn" onclick="step(\'daysOn\',-1)">−</button><input type="number" id="daysOn" min="1" max="365" value="'+onVal+'"><button class="step-btn" onclick="step(\'daysOn\',1)">+</button></div></div>'
+    +'<div class="form-group"><label for="daysOff">Days OFF</label><div class="stepper"><button class="step-btn" onclick="step(\'daysOff\',-1)">−</button><input type="number" id="daysOff" min="1" max="365" value="'+offVal+'"><button class="step-btn" onclick="step(\'daysOff\',1)">+</button></div></div>'
+    +'<button class="save-btn" onclick="saveRosterSub()">Save Roster</button>'
+    +'<button class="clear-btn" onclick="clearRosterSub()">Clear Roster</button>';
+  document.getElementById('settings-panel').innerHTML=h;
+}
+
+function saveRosterSub(){
   var s=document.getElementById('startDate').value;
   var on=parseInt(document.getElementById('daysOn').value,10);
   var off=parseInt(document.getElementById('daysOff').value,10);
-  if(!s){ alert('Please enter your swing start date.'); return; }
-  if(!on||on<1){ alert('Days ON must be at least 1.'); return; }
-  if(!off||off<1){ alert('Days OFF must be at least 1.'); return; }
-  saveRoster({startDate:s,daysOn:on,daysOff:off}); closePanel(); render();
+  if(!s){ showPanelMsg('Please enter your swing start date.'); return; }
+  if(!on||on<1){ showPanelMsg('Days ON must be at least 1.'); return; }
+  if(!off||off<1){ showPanelMsg('Days OFF must be at least 1.'); return; }
+  saveRoster({startDate:s,daysOn:on,daysOff:off});
+  render();
+  renderSettingsMenu();
 }
-function clearRoster(){
-  if(confirm('Clear your roster details?')){ localStorage.removeItem(ROSTER_KEY); closePanel(); render(); }
+function clearRosterSub(){
+  if(!window.confirm('Clear your roster details?')) return;
+  localStorage.removeItem(ROSTER_KEY);
+  render();
+  renderSettingsMenu();
 }
+
+/* ── Alarm subpage ─────────────────────────────────────── */
+function openSubAlarm(){
+  var alarm=loadAlarm();
+  var snooze=parseInt(alarm.snooze,10)||10;
+  var p5=snooze===5?'active':'', p10=snooze===10?'active':'', p15=snooze===15?'active':'';
+
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">⏰ Alarm</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="panel-row">'
+      +'<div><div class="panel-row-label">Wake-up Alarm</div><div class="panel-row-sub" id="alarm-toggle-sub">'+(alarm.on?'Rings at '+fmt12(alarm.time)+' daily':'Off')+'</div></div>'
+      +'<div class="toggle-inline"><span class="toggle-status'+(alarm.on?' on':'')+'" id="alarm-toggle-label">'+(alarm.on?'ON':'OFF')+'</span>'
+      +'<label class="toggle"><input type="checkbox" id="alarm-toggle"'+(alarm.on?' checked':'')+' onchange="toggleAlarm(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>'
+    +'</div>'
+    +'<div class="form-group"><label for="alarm-time-input">Wake-up time</label><input type="time" class="time-input" id="alarm-time-input" value="'+(alarm.time||'06:00')+'"></div>'
+    +'<div class="form-group"><label>Snooze duration</label><div class="snooze-pills">'
+      +'<button type="button" class="snooze-pill '+p5+'" data-min="5" onclick="selectSnooze(5)">5 min</button>'
+      +'<button type="button" class="snooze-pill '+p10+'" data-min="10" onclick="selectSnooze(10)">10 min</button>'
+      +'<button type="button" class="snooze-pill '+p15+'" data-min="15" onclick="selectSnooze(15)">15 min</button>'
+    +'</div></div>'
+    +'<button class="panel-save-btn" onclick="saveAlarmSub()">Save Alarm</button>'
+    +'<div id="alarm-sub-msg" style="padding:10px 22px 0;font-size:13px;color:var(--ok);"></div>';
+  document.getElementById('settings-panel').innerHTML=h;
+}
+
+function toggleAlarm(on){
+  var alarm=loadAlarm(); alarm.on=on; saveAlarm(alarm);
+  var lbl=document.getElementById('alarm-toggle-label');
+  var sub=document.getElementById('alarm-toggle-sub');
+  if(lbl){ lbl.textContent=on?'ON':'OFF'; lbl.className='toggle-status'+(on?' on':''); }
+  if(sub){ sub.textContent=on?('Rings at '+fmt12(alarm.time)+' daily'):'Off'; }
+  if(!on){ alarmFired=false; snoozeUntilTs=null; if(snoozeTimer){clearTimeout(snoozeTimer);snoozeTimer=null;} }
+  renderAlarmStatus();
+}
+
+function selectSnooze(mins){
+  document.querySelectorAll('.snooze-pill').forEach(function(p){
+    p.classList.toggle('active', parseInt(p.dataset.min,10)===mins);
+  });
+  var alarm=loadAlarm(); alarm.snooze=mins; saveAlarm(alarm);
+}
+
+function saveAlarmSub(){
+  var t=document.getElementById('alarm-time-input').value;
+  if(!t){ showPanelMsg('Please pick a wake-up time.'); return; }
+  var alarm=loadAlarm();
+  alarm.time=t;
+  alarm.on=document.getElementById('alarm-toggle').checked;
+  var activePill=document.querySelector('.snooze-pill.active');
+  alarm.snooze=activePill?parseInt(activePill.dataset.min,10):(alarm.snooze||10);
+  saveAlarm(alarm);
+  alarmFired=false; snoozeUntilTs=null;
+  if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
+  renderAlarmStatus();
+  var msg=document.getElementById('alarm-sub-msg');
+  if(msg){ msg.textContent='✓ Alarm saved'; setTimeout(function(){ msg.textContent=''; },2000); }
+}
+
+/* ── Spotify subpage ───────────────────────────────────── */
+function openSubSpotify(){
+  var sp=loadSpotify();
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">🎵 Spotify</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="form-group" style="margin-bottom:14px;">'
+      +'<label for="spotify-url-input">Playlist, album, or track link</label>'
+      +'<input type="url" class="spotify-url-input" id="spotify-url-input" placeholder="https://open.spotify.com/playlist/…" value="'+(sp.url||'')+'">'
+    +'</div>'
+    +'<div class="form-group" style="margin-bottom:14px;">'
+      +'<button class="spotify-test-btn" onclick="testSpotifyLink()">🎵 Test — Open Spotify Now</button>'
+    +'</div>'
+    +'<button class="panel-save-btn spotify-save" onclick="saveSpotifySub()">💾 Save Spotify Link</button>'
+    +'<div class="spotify-status" id="spotify-status" style="padding:10px 22px 0;"></div>';
+  document.getElementById('settings-panel').innerHTML=h;
+}
+
+function testSpotifyLink(){
+  var input=document.getElementById('spotify-url-input');
+  var url=(input?input.value:'').trim();
+  // Temporarily save so doOpenSpotify uses this URL
+  if(url) saveSpotify({url:url});
+  doOpenSpotify('spotify-status');
+}
+
+function saveSpotifySub(){
+  var input=document.getElementById('spotify-url-input');
+  var url=(input?input.value:'').trim();
+  saveSpotify({url:url});
+  var s=document.getElementById('spotify-status');
+  if(s){ s.textContent=url?'✓ Saved':'Cleared'; s.className=url?'spotify-status ok':'spotify-status';
+    setTimeout(function(){ s.textContent=''; s.className='spotify-status'; },2500); }
+}
+
+/* ── Don't Forget subpage ──────────────────────────────── */
+function openSubDontForget(){
+  var saved=localStorage.getItem(DONT_FORGET_KEY)||'';
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">📌 Don\'t Forget List</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="form-group" style="margin-bottom:10px;">'
+      +'<textarea id="dont-forget-textarea" class="panel-textarea" oninput="autosaveDontForget()" '
+        +'placeholder="• Flight check-in&#10;• Site access card&#10;• Chargers&#10;• Medications&#10;• Don\'t get lost"></textarea>'
+    +'</div>'
+    +'<button class="panel-save-notes-btn" id="dont-forget-save-btn" onclick="saveDontForget()">💾 Save List</button>';
+  document.getElementById('settings-panel').innerHTML=h;
+  var ta=document.getElementById('dont-forget-textarea');
+  if(ta) ta.value=saved;
+}
+
+var dontForgetAutosaveTimer=null;
+function autosaveDontForget(){
+  if(dontForgetAutosaveTimer) clearTimeout(dontForgetAutosaveTimer);
+  dontForgetAutosaveTimer=setTimeout(function(){ saveDontForget(true); },800);
+}
+function saveDontForget(silent){
+  var ta=document.getElementById('dont-forget-textarea');
+  var btn=document.getElementById('dont-forget-save-btn');
+  if(!ta) return;
+  localStorage.setItem(DONT_FORGET_KEY,ta.value);
+  if(!silent&&btn){
+    btn.textContent='✓ Saved'; btn.classList.add('saved');
+    setTimeout(function(){ btn.textContent='💾 Save List'; btn.classList.remove('saved'); },1800);
+  }
+}
+
+/* ── Notes subpage ─────────────────────────────────────── */
+function openSubNotes(){
+  var saved=localStorage.getItem(NOTES_KEY)||'';
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">📝 Notes</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="form-group" style="margin-bottom:10px;">'
+      +'<textarea id="notes-textarea" class="panel-textarea" oninput="autosaveNotes()" '
+        +'placeholder="Notes for this swing…"></textarea>'
+    +'</div>'
+    +'<button class="panel-save-notes-btn" id="notes-save-btn" onclick="saveNotesSub()">💾 Save Notes</button>';
+  document.getElementById('settings-panel').innerHTML=h;
+  var ta=document.getElementById('notes-textarea');
+  if(ta) ta.value=saved;
+}
+
+var notesAutosaveTimer=null;
+function autosaveNotes(){
+  if(notesAutosaveTimer) clearTimeout(notesAutosaveTimer);
+  notesAutosaveTimer=setTimeout(function(){ saveNotesSub(true); },800);
+}
+function saveNotesSub(silent){
+  var ta=document.getElementById('notes-textarea');
+  var btn=document.getElementById('notes-save-btn');
+  if(!ta) return;
+  localStorage.setItem(NOTES_KEY,ta.value);
+  if(!silent&&btn){
+    btn.textContent='✓ Saved'; btn.classList.add('saved');
+    setTimeout(function(){ btn.textContent='💾 Save Notes'; btn.classList.remove('saved'); },1800);
+  }
+}
+
+/* ── Utility ───────────────────────────────────────────── */
 function step(id,delta){
   var el=document.getElementById(id), v=parseInt(el.value,10)||0;
   el.value=Math.max(parseInt(el.min,10)||1,Math.min(parseInt(el.max,10)||365,v+delta));
 }
+function showPanelMsg(msg){
+  // Non-blocking inline message (no alert())
+  var existing=document.getElementById('_panel_err');
+  if(existing) existing.remove();
+  var d=document.createElement('div');
+  d.id='_panel_err';
+  d.style.cssText='padding:10px 22px;color:var(--danger);font-size:14px;';
+  d.textContent=msg;
+  var panel=document.getElementById('settings-panel');
+  if(panel) panel.appendChild(d);
+}
 
-/* ── BOOT ────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   SPLASH
+══════════════════════════════════════════════════════════ */
+(function(){
+  var splash=document.getElementById('splash');
+  var appWrap=document.getElementById('app-wrapper');
+  setTimeout(function(){
+    splash.classList.add('fade-out');
+    appWrap.classList.add('visible');
+    setTimeout(function(){ splash.style.display='none'; },650);
+  },2300);
+})();
+
+/* ══════════════════════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════════════════════ */
 render();
-var msToMidnight=function(){ var n=new Date(); return new Date(n.getFullYear(),n.getMonth(),n.getDate()+1)-n; };
+var msToMidnight=function(){
+  var n=new Date();
+  return new Date(n.getFullYear(),n.getMonth(),n.getDate()+1)-n;
+};
 setTimeout(function(){ render(); setInterval(render,86400000); }, msToMidnight());
 </script>
 </body>
 </html>
+
 
 

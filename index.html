@@ -581,7 +581,6 @@ var ALARM_KEY        = 'fifo_alarm_v1';
 var SPOTIFY_KEY      = 'fifo_spotify_v1';
 var DONT_FORGET_KEY  = 'fifo_dont_forget_v1';
 var NOTES_KEY        = 'fifo_notes_v1';
-var QUOTE_KEY        = 'fifo_quote_v1';
 
 function loadRoster(){
   try{ var r=localStorage.getItem(ROSTER_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
@@ -615,61 +614,77 @@ function fmt12(t){
 }
 
 /* ══════════════════════════════════════════════════════════
-   DAILY MOTIVATIONAL QUOTES
+   CALENDAR GENERATOR
 ══════════════════════════════════════════════════════════ */
-var quotes = [
-  "Focus on the destination, not the distance. Every shift is one step closer to home.",
-  "Work hard in silence, let your success make the noise.",
-  "The harder the grind, the sweeter the R&R.",
-  "You're not just working a swing; you're building a future for the ones you love.",
-  "Discipline is choosing between what you want now and what you want most.",
-  "Your sweat today is your security tomorrow. Keep grinding, legend.",
-  "Today is a new opportunity to back yourself and dominate the shift.",
-  "Great things take time. Stay patient, stay focused, stay safe.",
-  "Be stronger than your strongest excuse.",
-  "The only bad shift is the one you didn't work safely. Back yourself.",
-  "Look back at how far you've come, then keep pushing forward.",
-  "Make today count. The roster keeps moving, and so do you.",
-  "Stay safe, look out for your mates, and get the job done.",
-  "Consistency turns average shifts into champion swings.",
-  "The grind might be tough, but you are tougher. Finish the swing strong."
-];
-
-function getDailyQuote() {
-  var dStr = today().toDateString();
-  try {
-    var stored = localStorage.getItem(QUOTE_KEY);
-    if (stored) {
-      var parsed = JSON.parse(stored);
-      if (parsed.date === dStr) {
-        return parsed.text;
+function generateCalendarHTML() {
+  var now = today();
+  var year = now.getFullYear();
+  var month = now.getMonth();
+  
+  var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  
+  var firstDay = new Date(year, month, 1, 0, 0, 0, 0);
+  var startingDay = firstDay.getDay();
+  var totalDays = new Date(year, month + 1, 0).getDate();
+  
+  var roster = loadRoster();
+  
+  var h = '<div class="stat-card wide" style="padding: 16px 14px;">'
+    + '<div class="stat-label">📅 ' + monthNames[month] + ' ' + year + '</div>'
+    + '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; margin-top: 10px; font-size: 12px; font-family: var(--mono);">';
+  
+  var daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"];
+  for (var i = 0; i < 7; i++) {
+    h += '<div style="color: var(--muted); font-weight: 600;">' + daysOfWeek[i] + '</div>';
+  }
+  
+  for (var i = 0; i < startingDay; i++) {
+    h += '<div></div>';
+  }
+  
+  for (var d = 1; d <= totalDays; d++) {
+    var dObj = new Date(year, month, d, 0, 0, 0, 0);
+    var isToday = (dObj.getTime() === now.getTime());
+    
+    var bg = 'transparent';
+    var color = 'var(--text)';
+    var border = 'none';
+    
+    if (roster) {
+      var start = parseDate(roster.startDate);
+      var daysOn = parseInt(roster.daysOn,10);
+      var daysOff = parseInt(roster.daysOff,10);
+      var cycleLen = daysOn + daysOff;
+      var elapsed = diffDays(start, dObj);
+      var pos = ((elapsed % cycleLen) + cycleLen) % cycleLen;
+      var isOnSwing = (pos < daysOn);
+      
+      if (isOnSwing) {
+        color = 'var(--accent)';
+      } else {
+        color = 'var(--ok)';
       }
     }
-  } catch(e) {}
+    
+    if (isToday) {
+      border = '1px solid var(--text)';
+      bg = 'rgba(255, 255, 255, 0.1)';
+    }
+    
+    h += '<div style="aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: 500; border-radius: 50%; background: ' + bg + '; color: ' + color + '; border: ' + border + ';">' + d + '</div>';
+  }
   
-  var d = today();
-  var index = (d.getFullYear() * 37 + d.getMonth() * 12 + d.getDate()) % quotes.length;
-  var q = quotes[index];
+  h += '</div>';
   
-  saveDailyQuote(q);
-  return q;
-}
-
-function saveDailyQuote(text) {
-  try {
-    localStorage.setItem(QUOTE_KEY, JSON.stringify({
-      date: today().toDateString(),
-      text: text
-    }));
-  } catch(e) {}
-}
-
-function rollNewQuote() {
-  var current = getDailyQuote();
-  var filtered = quotes.filter(function(q) { return q !== current; });
-  var next = filtered.length > 0 ? filtered[Math.floor(Math.random() * filtered.length)] : current;
-  saveDailyQuote(next);
-  render();
+  if (roster) {
+    h += '<div style="display: flex; justify-content: center; gap: 16px; margin-top: 12px; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;">'
+      + '<span style="color: var(--accent);">● On Site</span>'
+      + '<span style="color: var(--ok);">● R&R</span>'
+      + '</div>';
+  }
+  
+  h += '</div>';
+  return h;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1066,19 +1081,12 @@ function render(){
   var heroNum=isOnSwing?daysLeft:offLeft;
   var hc=isOnSwing?(daysLeft<=2?'danger':''):'ok';
 
-  var h='';
+  var h = '';
 
-  // Daily Motivational Card
-  var dailyQuote = getDailyQuote();
-  h+='<div class="morning-card" onclick="rollNewQuote()" style="cursor: pointer; user-select: none;">'
-    +'<div class="morning-card-icon">💡</div>'
-    +'<div>'
-      +'<div class="morning-card-title">Daily Boost <span style="font-size: 11px; font-weight: normal; color: var(--muted); margin-left: 6px;">(Tap to cycle)</span></div>'
-      +'<div class="morning-card-sub" style="color: var(--text); font-weight: 500;">' + dailyQuote + '</div>'
-    +'</div>'
-  +'</div>';
+  // Monthly Calendar Card
+  h += generateCalendarHTML();
 
-  h+='<div class="hero">'
+  h += '<div class="hero">'
       +'<div class="hero-label">'+(isOnSwing?'Days left on swing':'Days left at home')+'</div>'
       +'<div class="hero-number '+hc+'">'+heroNum+'</div>'
       +'<div class="hero-unit">'+(heroNum===1?'day':'days')+'</div>'

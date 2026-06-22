@@ -616,21 +616,57 @@ function fmt12(t){
 /* ══════════════════════════════════════════════════════════
    CALENDAR GENERATOR
 ══════════════════════════════════════════════════════════ */
+var calYear = null;
+var calMonth = null;
+
+function initCalendarView() {
+  if (calYear === null || calMonth === null) {
+    var now = today();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+  }
+}
+
+function prevMonth() {
+  initCalendarView();
+  calMonth--;
+  if (calMonth < 0) {
+    calMonth = 11;
+    calYear--;
+  }
+  render();
+}
+
+function nextMonth() {
+  initCalendarView();
+  calMonth++;
+  if (calMonth > 11) {
+    calMonth = 0;
+    calYear++;
+  }
+  render();
+}
+
 function generateCalendarHTML() {
+  initCalendarView();
   var now = today();
-  var year = now.getFullYear();
-  var month = now.getMonth();
   
   var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   
-  var firstDay = new Date(year, month, 1, 0, 0, 0, 0);
+  var firstDay = new Date(calYear, calMonth, 1, 0, 0, 0, 0);
   var startingDay = firstDay.getDay();
-  var totalDays = new Date(year, month + 1, 0).getDate();
+  var totalDays = new Date(calYear, calMonth + 1, 0).getDate();
   
   var roster = loadRoster();
   
   var h = '<div class="stat-card wide" style="padding: 16px 14px;">'
-    + '<div class="stat-label">📅 ' + monthNames[month] + ' ' + year + '</div>'
+    + '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">'
+      + '<div class="stat-label" style="margin-bottom: 0;">📅 ' + monthNames[calMonth] + ' ' + calYear + '</div>'
+      + '<div style="display: flex; gap: 8px;">'
+        + '<button onclick="prevMonth()" style="background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 6px; width: 28px; height: 28px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">‹</button>'
+        + '<button onclick="nextMonth()" style="background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 6px; width: 28px; height: 28px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">›</button>'
+      + '</div>'
+    + '</div>'
     + '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; margin-top: 10px; font-size: 12px; font-family: var(--mono); justify-items: center;">';
   
   var daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"];
@@ -643,7 +679,7 @@ function generateCalendarHTML() {
   }
   
   for (var d = 1; d <= totalDays; d++) {
-    var dObj = new Date(year, month, d, 0, 0, 0, 0);
+    var dObj = new Date(calYear, calMonth, d, 0, 0, 0, 0);
     var isToday = (dObj.getTime() === now.getTime());
     
     var bg = 'transparent';
@@ -1035,4 +1071,423 @@ function renderAlarmStatus(){
   if(!el) return;
   var alarm=loadAlarm();
   if(alarm.on&&alarm.time){
-    el.innerHTML='<div class="alarm-status-dot"></div>Alarm: '+fmt12(alarm.time)+' &middot; Snooze: '+(alarm.snooze||10)+' min
+    el.innerHTML='<div class="alarm-status-dot"></div>Alarm: '+fmt12(alarm.time)+' &middot; Snooze: '+(alarm.snooze||10)+' min';
+    el.classList.remove('hidden');
+  } else {
+    el.innerHTML=''; el.classList.add('hidden');
+  }
+}
+
+/* ── MAIN RENDER ───────────────────────────────────────── */
+function render(){
+  var roster=loadRoster(), el=document.getElementById('main-content');
+
+  if(!roster){
+    el.innerHTML=
+      '<div class="empty-state">'
+        +'<div class="empty-icon">⛏️</div>'
+        +'<div class="empty-title">Set up your roster</div>'
+        +'<div class="empty-sub">Enter your swing start date and roster pattern to start counting down.</div>'
+        +'<button class="cta-btn" onclick="openPanel()">Enter Roster Details</button>'
+      +'</div>'
+      +'<div class="alarm-status-row hidden" id="alarm-status-line"></div>';
+    renderAlarmStatus();
+    return;
+  }
+
+  var start=parseDate(roster.startDate), daysOn=parseInt(roster.daysOn,10), daysOff=parseInt(roster.daysOff,10);
+  var now=today(), elapsed=diffDays(start,now);
+  var cycleLen=daysOn+daysOff, cycles=elapsed>=0?Math.floor(elapsed/cycleLen):0;
+  var curStart=addDays(start,cycles*cycleLen), curFlyHome=addDays(curStart,daysOn), curEnd=addDays(curStart,cycleLen);
+  var isOnSwing=(elapsed>=0)&&(now<curFlyHome);
+  var nextSwing=isOnSwing?null:curEnd;
+  var dayOfSwing=Math.max(1,Math.min(daysOn,diffDays(curStart,now)+1));
+  var daysLeft=Math.max(0,diffDays(now,curFlyHome));
+  var offGone=isOnSwing?0:diffDays(curFlyHome,now);
+  var offLeft=isOnSwing?daysOff:Math.max(0,daysOff-offGone);
+  var pct=isOnSwing?Math.min(100,Math.round(((daysOn-daysLeft)/daysOn)*100)):Math.min(100,Math.round((offGone/daysOff)*100));
+  var heroNum=isOnSwing?daysLeft:offLeft;
+  var hc=isOnSwing?(daysLeft<=2?'danger':''):'ok';
+
+  var h = '';
+
+  // Monthly Calendar Card
+  h += generateCalendarHTML();
+
+  h += '<div class="hero">'
+      +'<div class="hero-label">'+(isOnSwing?'Days left on swing':'Days left at home')+'</div>'
+      +'<div class="hero-number '+hc+'">'+heroNum+'</div>'
+      +'<div class="hero-unit">'+(heroNum===1?'day':'days')+'</div>'
+      +'<div class="hero-sub">'+(isOnSwing
+        ?'Fly home <strong>'+(daysLeft===0?'today! ✈️':formatDate(curFlyHome))+'</strong>'
+        :'Back on site <strong>'+formatDate(nextSwing||curFlyHome)+'</strong>')+'</div>'
+      +'<div class="progress-wrap"><div class="progress-fill '+(isOnSwing?'':'done')+'" style="width:'+pct+'%"></div></div>'
+      +'<div class="progress-label">'
+        +'<span>'+(isOnSwing?'Day 1':'Fly-home')+'</span>'
+        +'<span>'+pct+'%</span>'
+        +'<span>'+(isOnSwing?'Day '+daysOn:'Back on site')+'</span>'
+      +'</div>'
+    +'</div>'
+    +'<div class="stat-grid">';
+
+  if(isOnSwing){
+    h+='<div class="stat-card">'
+        +'<div class="stat-label">Swing Day</div>'
+        +'<div class="stat-value accent">'+dayOfSwing+' <span style="font-size:15px;color:var(--muted)">/ '+daysOn+'</span></div>'
+        +'<div class="stat-sub">of '+daysOn+' days on</div>'
+      +'</div>'
+      +'<div class="stat-card">'
+        +'<div class="stat-label">Days Left</div>'
+        +'<div class="stat-value '+(daysLeft<=2?'danger':'')+'">'+daysLeft+'</div>'
+        +'<div class="stat-sub">until fly-home</div>'
+      +'</div>'
+      +'<div class="stat-card wide compact">'
+        +'<div class="stat-label">Fly-home Date</div>'
+        +'<div class="stat-value date-val">'+formatDate(curFlyHome)+' ✈️</div>'
+      +'</div>'
+      +'<div class="stat-card">'
+        +'<div class="stat-label">Days Off</div>'
+        +'<div class="stat-value ok">'+daysOff+'</div>'
+        +'<div class="stat-sub">when you get home</div>'
+      +'</div>'
+      +'<div class="stat-card">'
+        +'<div class="stat-label">Back on Site</div>'
+        +'<div class="stat-value date-val">'+formatDate(addDays(curFlyHome,daysOff))+'</div>'
+      +'</div>';
+  } else {
+    h+='<div class="stat-card wide">'
+        +'<div class="stat-label">You\'re home! 🏠</div>'
+        +'<div class="stat-value ok">'+offLeft+'</div>'
+        +'<div class="stat-sub">days off remaining</div>'
+      +'</div>'
+      +'<div class="stat-card wide compact">'
+        +'<div class="stat-label">Back on site</div>'
+        +'<div class="stat-value date-val">'+formatDate(nextSwing)+'</div>'
+      +'</div>'
+      +'<div class="stat-card">'
+        +'<div class="stat-label">Days Off Gone</div>'
+        +'<div class="stat-value">'+offGone+'</div>'
+        +'<div class="stat-sub">of '+daysOff+'</div>'
+      +'</div>'
+      +'<div class="stat-card">'
+        +'<div class="stat-label">Roster Pattern</div>'
+        +'<div class="stat-value">'+daysOn+'/'+daysOff+'</div>'
+        +'<div class="stat-sub">on / off</div>'
+      +'</div>';
+  }
+
+  h+='</div>'
+    +'<div class="today-row"><div class="today-dot"></div>Today is '+formatDate(now)+' &bull; '+roster.daysOn+'/'+roster.daysOff+' roster</div>'
+    +'<div class="alarm-status-row hidden" id="alarm-status-line"></div>';
+
+  el.innerHTML=h;
+  renderAlarmStatus();
+}
+
+/* ── Settings PANEL — menu + subpages ──────────────────── */
+function openPanel(){
+  renderSettingsMenu();
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePanel(){
+  stopAlarmSound();
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function handleOverlayClick(e){
+  if(e.target===document.getElementById('overlay')) closePanel();
+}
+
+/* ── Main menu ─────────────────────────────────────────── */
+function renderSettingsMenu(){
+  stopAlarmSound();
+  var alarm=loadAlarm();
+  var alarmSub=alarm.on?('Alarm on · '+fmt12(alarm.time)):'Alarm off';
+  var sp=loadSpotify();
+  var spSub=sp.url?'Link saved':'No link saved';
+
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">Settings</div>'
+    +menuBtn('📅','Roster','Swing dates &amp; pattern','openSubRoster()')
+    +menuBtn('⏰','Alarm',alarmSub,'openSubAlarm()')
+    +menuBtn('🎵','Spotify',spSub,'openSubSpotify()')
+    +menuBtn('📌',"Don't Forget List",'Packing &amp; check-in list','openSubDontForget()')
+    +menuBtn('📝','Notes','Swing notes','openSubNotes()');
+  document.getElementById('settings-panel').innerHTML=h;
+}
+
+function menuBtn(icon,label,sub,onclick){
+  return '<button class="settings-menu-btn" onclick="'+onclick+'">'
+    +'<span class="smb-icon">'+icon+'</span>'
+    +'<span class="smb-label-wrap"><span>'+label+'</span><span class="smb-sub">'+sub+'</span></span>'
+    +'<span class="smb-chev">›</span>'
+  +'</button>';
+}
+
+/* ── Roster subpage ────────────────────────────────────── */
+function openSubRoster(){
+  var r=loadRoster();
+  var startVal='', onVal='14', offVal='7';
+  if(r){ startVal=r.startDate; onVal=r.daysOn; offVal=r.daysOff; }
+  else { var d=new Date(), pad=function(n){return String(n).padStart(2,'0');}; startVal=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">📅 Roster</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="p-section-head">Swing Start Date</div>'
+    +'<div class="form-group"><label for="startDate">First day on site</label><input type="date" id="startDate" value="'+startVal+'"></div>'
+    +'<div class="p-divider"></div>'
+    +'<div class="p-section-head">Roster Pattern</div>'
+    +'<div class="form-group"><label for="daysOn">Days ON</label><div class="stepper"><button class="step-btn" onclick="step(\'daysOn\',-1)">−</button><input type="number" id="daysOn" min="1" max="365" value="'+onVal+'"><button class="step-btn" onclick="step(\'daysOn\',1)">+</button></div></div>'
+    +'<div class="form-group"><label for="daysOff">Days OFF</label><div class="stepper"><button class="step-btn" onclick="step(\'daysOff\',-1)">−</button><input type="number" id="daysOff" min="1" max="365" value="'+offVal+'"><button class="step-btn" onclick="step(\'daysOff\',1)">+</button></div></div>'
+    +'<button class="save-btn" onclick="saveRosterSub()">Save Roster</button>'
+    +'<button class="clear-btn" onclick="clearRosterSub()">Clear Roster</button>';
+  document.getElementById('settings-panel').innerHTML=h;
+}
+
+function saveRosterSub(){
+  var s=document.getElementById('startDate').value;
+  var on=parseInt(document.getElementById('daysOn').value,10);
+  var off=parseInt(document.getElementById('daysOff').value,10);
+  if(!s){ showPanelMsg('Please enter your swing start date.'); return; }
+  if(!on||on<1){ showPanelMsg('Days ON must be at least 1.'); return; }
+  if(!off||off<1){ showPanelMsg('Days OFF must be at least 1.'); return; }
+  saveRoster({startDate:s,daysOn:on,daysOff:off});
+  render();
+  renderSettingsMenu();
+}
+function clearRosterSub(){
+  if(!window.confirm('Clear your roster details?')) return;
+  localStorage.removeItem(ROSTER_KEY);
+  render();
+  renderSettingsMenu();
+}
+
+/* ── Alarm subpage ─────────────────────────────────────── */
+function openSubAlarm(){
+  var alarm=loadAlarm();
+  var snooze=parseInt(alarm.snooze,10)||10;
+  var p5=snooze===5?'active':'', p10=snooze===10?'active':'', p15=snooze===15?'active':'';
+
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">⏰ Alarm</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="panel-row">'
+      +'<div><div class="panel-row-label">Wake-up Alarm</div><div class="panel-row-sub" id="alarm-toggle-sub">'+(alarm.on?'Rings at '+fmt12(alarm.time)+' daily':'Off')+'</div></div>'
+      +'<div class="toggle-inline"><span class="toggle-status'+(alarm.on?' on':'')+'" id="alarm-toggle-label">'+(alarm.on?'ON':'OFF')+'</span>'
+      +'<label class="toggle"><input type="checkbox" id="alarm-toggle"'+(alarm.on?' checked':'')+' onchange="toggleAlarm(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>'
+    +'</div>'
+    +'<div class="form-group"><label for="alarm-time-input">Wake-up time</label><input type="time" class="time-input" id="alarm-time-input" value="'+(alarm.time||'06:00')+'"></div>'
+    +'<div class="form-group"><label>Snooze duration</label><div class="snooze-pills">'
+      +'<button type="button" class="snooze-pill '+p5+'" data-min="5" onclick="selectSnooze(5)">5 min</button>'
+      +'<button type="button" class="snooze-pill '+p10+'" data-min="10" onclick="selectSnooze(10)">10 min</button>'
+      +'<button type="button" class="snooze-pill '+p15+'" data-min="15" onclick="selectSnooze(15)">15 min</button>'
+    +'</div></div>'
+    +'<button class="panel-save-btn" onclick="saveAlarmSub()">Save Alarm</button>'
+    +'<div id="alarm-sub-msg" style="padding:10px 22px 0;font-size:13px;color:var(--ok);"></div>'
+    +'<div class="p-divider"></div>'
+    +'<div class="p-section-head">Alarm Sound (iOS Setup)</div>'
+    +'<div class="form-group" style="display:flex; flex-direction:column; gap:10px;">'
+      +'<button type="button" class="panel-save-notes-btn" id="enable-sound-btn" style="margin:0; width:100%;" onclick="enableAlarmSound()">🔊 Enable Alarm Sound</button>'
+      +'<button type="button" class="panel-save-notes-btn" id="test-sound-btn" style="margin:0; width:100%;" onclick="testAlarmSound()">🔊 Test Alarm Sound</button>'
+    +'</div>';
+  document.getElementById('settings-panel').innerHTML=h;
+
+  setTimeout(function(){
+    var ctx = getAudioCtx();
+    if (ctx && ctx.state === 'running') {
+      updateEnableBtn();
+    }
+  }, 50);
+}
+
+function toggleAlarm(on){
+  var alarm=loadAlarm(); alarm.on=on; saveAlarm(alarm);
+  var lbl=document.getElementById('alarm-toggle-label');
+  var sub=document.getElementById('alarm-toggle-sub');
+  if(lbl){ lbl.textContent=on?'ON':'OFF'; lbl.className='toggle-status'+(on?' on':''); }
+  if(sub){ sub.textContent=on?('Rings at '+fmt12(alarm.time)+' daily'):'Off'; }
+  if(!on){ alarmFired=false; snoozeUntilTs=null; if(snoozeTimer){clearTimeout(snoozeTimer);snoozeTimer=null;} }
+  
+  if (on) {
+    var ctx = getAudioCtx();
+    if (ctx) {
+      ctx.resume().then(function() {
+        startKeepAlive();
+      }).catch(function(){});
+    }
+    playSilentLoop();
+  }
+
+  renderAlarmStatus();
+}
+
+function selectSnooze(mins){
+  document.querySelectorAll('.snooze-pill').forEach(function(p){
+    p.classList.toggle('active', parseInt(p.dataset.min,10)===mins);
+  });
+  var alarm=loadAlarm(); alarm.snooze=mins; saveAlarm(alarm);
+}
+
+function saveAlarmSub(){
+  var t=document.getElementById('alarm-time-input').value;
+  if(!t){ showPanelMsg('Please pick a wake-up time.'); return; }
+  var alarm=loadAlarm();
+  alarm.time=t;
+  alarm.on=document.getElementById('alarm-toggle').checked;
+  var activePill=document.querySelector('.snooze-pill.active');
+  alarm.snooze=activePill?parseInt(activePill.dataset.min,10):(alarm.snooze||10);
+  saveAlarm(alarm);
+  alarmFired=false; snoozeUntilTs=null;
+  if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
+  renderAlarmStatus();
+  
+  var ctx = getAudioCtx();
+  if (ctx) {
+    ctx.resume().then(function() {
+      startKeepAlive();
+    }).catch(function(){});
+  }
+  playSilentLoop();
+
+  var msg=document.getElementById('alarm-sub-msg');
+  if(msg){ msg.textContent='✓ Alarm saved'; setTimeout(function(){ msg.textContent=''; },2000); }
+}
+
+/* ── Spotify subpage ───────────────────────────────────── */
+function openSubSpotify(){
+  var sp=loadSpotify();
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">🎵 Spotify</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="form-group" style="margin-bottom:14px;">'
+      +'<label for="spotify-url-input">Playlist, album, or track link</label>'
+      +'<input type="url" class="spotify-url-input" id="spotify-url-input" placeholder="https://open.spotify.com/playlist/…" value="'+(sp.url||'')+'">'
+    +'</div>'
+    +'<div class="form-group" style="margin-bottom:14px;">'
+      +'<button class="spotify-test-btn" onclick="testSpotifyLink()">🎵 Test — Open Spotify Now</button>'
+    +'</div>'
+    +'<button class="panel-save-btn spotify-save" onclick="saveSpotifySub()">💾 Save Spotify Link</button>'
+    +'<div class="spotify-status" id="spotify-status" style="padding:10px 22px 0;"></div>';
+  document.getElementById('settings-panel').innerHTML=h;
+}
+
+function testSpotifyLink(){
+  var input=document.getElementById('spotify-url-input');
+  var url=(input?input.value:'').trim();
+  if(url) saveSpotify({url:url});
+  doOpenSpotify('spotify-status');
+}
+
+function saveSpotifySub(){
+  var input=document.getElementById('spotify-url-input');
+  var url=(input?input.value:'').trim();
+  saveSpotify({url:url});
+  var s=document.getElementById('spotify-status');
+  if(s){ s.textContent=url?'✓ Saved':'Cleared'; s.className=url?'spotify-status ok':'spotify-status';
+    setTimeout(function(){ s.textContent=''; s.className='spotify-status'; },2500); }
+}
+
+/* ── Don't Forget subpage ──────────────────────────────── */
+function openSubDontForget(){
+  var saved=localStorage.getItem(DONT_FORGET_KEY)||'';
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">📌 Don\'t Forget List</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="form-group" style="margin-bottom:10px;">'
+      +'<textarea id="dont-forget-textarea" class="panel-textarea" oninput="autosaveDontForget()" '
+        +'placeholder="• Flight check-in&#10;• Site access card&#10;• Chargers&#10;• Medications&#10;• Don\'t get lost"></textarea>'
+    +'</div>'
+    +'<button class="panel-save-notes-btn" id="dont-forget-save-btn" onclick="saveDontForget()">💾 Save List</button>';
+  document.getElementById('settings-panel').innerHTML=h;
+  var ta=document.getElementById('dont-forget-textarea');
+  if(ta) ta.value=saved;
+}
+
+var dontForgetAutosaveTimer=null;
+function autosaveDontForget(){
+  if(dontForgetAutosaveTimer) clearTimeout(dontForgetAutosaveTimer);
+  dontForgetAutosaveTimer=setTimeout(function(){ saveDontForget(true); },800);
+}
+function saveDontForget(silent){
+  var ta=document.getElementById('dont-forget-textarea');
+  var btn=document.getElementById('dont-forget-save-btn');
+  if(!ta) return;
+  localStorage.setItem(DONT_FORGET_KEY,ta.value);
+  if(!silent&&btn){
+    btn.textContent='✓ Saved'; btn.classList.add('saved');
+    setTimeout(function(){ btn.textContent='💾 Save List'; btn.classList.remove('saved'); },1800);
+  }
+}
+
+/* ── Notes subpage ─────────────────────────────────────── */
+function openSubNotes(){
+  var saved=localStorage.getItem(NOTES_KEY)||'';
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">📝 Notes</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="form-group" style="margin-bottom:10px;">'
+      +'<textarea id="notes-textarea" class="panel-textarea" oninput="autosaveNotes()" '
+        +'placeholder="Notes for this swing…"></textarea>'
+    +'</div>'
+    +'<button class="panel-save-notes-btn" id="notes-save-btn" onclick="saveNotesSub()">💾 Save Notes</button>';
+  document.getElementById('settings-panel').innerHTML=h;
+  var ta=document.getElementById('notes-textarea');
+  if(ta) ta.value=saved;
+}
+
+var notesAutosaveTimer=null;
+function autosaveNotes(){
+  if(notesAutosaveTimer) clearTimeout(notesAutosaveTimer);
+  notesAutosaveTimer=setTimeout(function(){ saveNotesSub(true); },800);
+}
+function saveNotesSub(silent){
+  var ta=document.getElementById('notes-textarea');
+  var btn=document.getElementById('notes-save-btn');
+  if(!ta) return;
+  localStorage.setItem(NOTES_KEY,ta.value);
+  if(!silent&&btn){
+    btn.textContent='✓ Saved'; btn.classList.add('saved');
+    setTimeout(function(){ btn.textContent='💾 Save Notes'; btn.classList.remove('saved'); },1800);
+  }
+}
+
+/* ── Utility ───────────────────────────────────────────── */
+function step(id,delta){
+  var el=document.getElementById(id), v=parseInt(el.value,10)||0;
+  el.value=Math.max(parseInt(el.min,10)||1,Math.min(parseInt(el.max,10)||365,v+delta));
+}
+function showPanelMsg(msg){
+  var existing=document.getElementById('_panel_err');
+  if(existing) existing.remove();
+  var d=document.createElement('div');
+  d.id='_panel_err';
+  d.style.cssText='padding:10px 22px;color:var(--danger);font-size:14px;';
+  d.textContent=msg;
+  var panel=document.getElementById('settings-panel');
+  if(panel) panel.appendChild(d);
+}
+
+/* ══════════════════════════════════════════════════════════
+   SPLASH
+══════════════════════════════════════════════════════════ */
+(function(){
+  var splash=document.getElementById('splash');
+  var appWrap=document.getElementById('app-wrapper');
+  setTimeout(function(){
+    splash.classList.add('fade-out');
+    appWrap.classList.add('visible');
+    setTimeout(function(){ splash.style.display='none'; },650);
+  },2300);
+})();
+
+render();
+var msToMidnight=function(){
+  var n=new Date();
+  return new Date(n.getFullYear(),n.getMonth(),n.getDate()+1)-n;
+};
+setTimeout(function(){ render(); setInterval(render,86400000); }, msToMidnight());
+</script>
+</body>
+</html>

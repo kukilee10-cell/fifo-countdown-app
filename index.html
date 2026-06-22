@@ -726,14 +726,14 @@ function generateCalendarHTML() {
       bg = 'rgba(255, 255, 255, 0.1)';
     }
     
-    h += '<div onclick="openRemindersSub(\'' + dateStr + '\')" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 500; border-radius: 50%; background: ' + bg + '; color: ' + color + '; border: ' + border + '; margin: 0 auto; cursor: pointer; position: relative; user-select: none;">' 
+    h += '<button onclick="openRemindersSub(\'' + dateStr + '\')" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 500; border-radius: 50%; background: ' + bg + '; color: ' + color + '; border: ' + border + '; margin: 0 auto; cursor: pointer; position: relative; user-select: none; font-family: inherit; font-size: 12px; outline: none; -webkit-tap-highlight-color: transparent; padding: 0;">' 
       + d;
       
     if (hasReminder) {
       h += '<div style="position: absolute; bottom: 3px; width: 4px; height: 4px; background: #5cafff; border-radius: 50%;"></div>';
     }
     
-    h += '</div>';
+    h += '</button>';
   }
   
   h += '</div>';
@@ -1566,4 +1566,18 @@ function showPanelMsg(msg){
   var splash=document.getElementById('splash');
   var appWrap=document.getElementById('app-wrapper');
   setTimeout(function(){
-    s
+    splash.classList.add('fade-out');
+    appWrap.classList.add('visible');
+    setTimeout(function(){ splash.style.display='none'; },650);
+  },2300);
+})();
+
+render();
+var msToMidnight=function(){
+  var n=new Date();
+  return new Date(n.getFullYear(),n.getMonth(),n.getDate()+1)-n;
+};
+setTimeout(function(){ render(); setInterval(render,86400000); }, msToMidnight());
+</script>
+</body>
+</html>

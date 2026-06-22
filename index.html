@@ -581,6 +581,7 @@ var ALARM_KEY        = 'fifo_alarm_v1';
 var SPOTIFY_KEY      = 'fifo_spotify_v1';
 var DONT_FORGET_KEY  = 'fifo_dont_forget_v1';
 var NOTES_KEY        = 'fifo_notes_v1';
+var REMINDERS_KEY    = 'fifo_reminders_v1';
 
 function loadRoster(){
   try{ var r=localStorage.getItem(ROSTER_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
@@ -599,6 +600,16 @@ function loadSpotify(){
 }
 function saveSpotify(d){ localStorage.setItem(SPOTIFY_KEY,JSON.stringify(d)); }
 
+function loadReminders() {
+  try {
+    var r = localStorage.getItem(REMINDERS_KEY);
+    return r ? JSON.parse(r) : {};
+  } catch(e) { return {}; }
+}
+function saveReminders(d) {
+  localStorage.setItem(REMINDERS_KEY, JSON.stringify(d));
+}
+
 /* ══════════════════════════════════════════════════════════
    DATE HELPERS
 ══════════════════════════════════════════════════════════ */
@@ -614,7 +625,7 @@ function fmt12(t){
 }
 
 /* ══════════════════════════════════════════════════════════
-   CALENDAR GENERATOR
+   CALENDAR GENERATOR (With Navigation & Reminders)
 ══════════════════════════════════════════════════════════ */
 var calYear = null;
 var calMonth = null;
@@ -658,6 +669,7 @@ function generateCalendarHTML() {
   var totalDays = new Date(calYear, calMonth + 1, 0).getDate();
   
   var roster = loadRoster();
+  var reminders = loadReminders();
   
   var h = '<div class="stat-card wide" style="padding: 16px 14px;">'
     + '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">'
@@ -681,6 +693,9 @@ function generateCalendarHTML() {
   for (var d = 1; d <= totalDays; d++) {
     var dObj = new Date(calYear, calMonth, d, 0, 0, 0, 0);
     var isToday = (dObj.getTime() === now.getTime());
+    
+    var dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    var hasReminder = (reminders[dateStr] && reminders[dateStr].length > 0);
     
     var bg = 'transparent';
     var color = 'var(--text)';
@@ -711,7 +726,14 @@ function generateCalendarHTML() {
       bg = 'rgba(255, 255, 255, 0.1)';
     }
     
-    h += '<div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 500; border-radius: 50%; background: ' + bg + '; color: ' + color + '; border: ' + border + '; margin: 0 auto;">' + d + '</div>';
+    h += '<div onclick="openRemindersSub(\'' + dateStr + '\')" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 500; border-radius: 50%; background: ' + bg + '; color: ' + color + '; border: ' + border + '; margin: 0 auto; cursor: pointer; position: relative; user-select: none;">' 
+      + d;
+      
+    if (hasReminder) {
+      h += '<div style="position: absolute; bottom: 3px; width: 4px; height: 4px; background: #5cafff; border-radius: 50%;"></div>';
+    }
+    
+    h += '</div>';
   }
   
   h += '</div>';
@@ -725,6 +747,74 @@ function generateCalendarHTML() {
   
   h += '</div>';
   return h;
+}
+
+/* ── REMINDERS SUBPANEL ────────────────────────────────── */
+function openRemindersSub(dateStr) {
+  var reminders = loadReminders();
+  var list = reminders[dateStr] || [];
+  
+  var p = dateStr.split('-');
+  var dObj = new Date(p[0], p[1]-1, p[2]);
+  var displayDate = dObj.toLocaleDateString('en-AU', {day:'numeric', month:'short', year:'numeric'});
+  
+  var h = '<div class="panel-handle"></div>'
+    + '<div class="panel-title">📅 Reminders</div>'
+    + '<button class="sub-back-btn" onclick="closePanel()">Close</button>'
+    + '<div class="p-section-head" style="margin-bottom: 14px;">Reminders for ' + displayDate + '</div>';
+    
+  if (list.length === 0) {
+    h += '<div style="padding: 10px 22px; color: var(--muted); font-size: 14px;">No reminders set for this date.</div>';
+  } else {
+    h += '<div style="padding: 0 22px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px;">';
+    for (var i = 0; i < list.length; i++) {
+      h += '<div style="display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;">'
+        + '<span style="font-size: 15px; color: var(--text);">' + list[i] + '</span>'
+        + '<button onclick="deleteReminder(\'' + dateStr + '\', ' + i + ')" style="background: none; border: none; color: var(--danger); font-size: 16px; cursor: pointer; padding: 4px 8px;">🗑️</button>'
+        + '</div>';
+    }
+    h += '</div>';
+  }
+  
+  h += '<div class="p-divider"></div>'
+    + '<div class="form-group">'
+      + '<label for="reminder-input">Add New Reminder</label>'
+      + '<div style="display: flex; gap: 10px;">'
+        + '<input type="text" id="reminder-input" onkeydown="if(event.key===\'Enter\') addReminder(\'' + dateStr + '\')" placeholder="e.g. Flight 10:30am, Birthday..." style="flex: 1; background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; color: var(--text); padding: 12px 14px; font-size: 16px; outline: none;">'
+        + '<button onclick="addReminder(\'' + dateStr + '\')" style="background: var(--accent); color: #000; border: none; border-radius: 12px; padding: 0 18px; font-weight: bold; font-size: 15px; cursor: pointer;">Add</button>'
+      + '</div>'
+    + '</div>';
+    
+  document.getElementById('settings-panel').innerHTML = h;
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function addReminder(dateStr) {
+  var input = document.getElementById('reminder-input');
+  var text = (input ? input.value : '').trim();
+  if (!text) return;
+  
+  var reminders = loadReminders();
+  if (!reminders[dateStr]) reminders[dateStr] = [];
+  reminders[dateStr].push(text);
+  saveReminders(reminders);
+  
+  openRemindersSub(dateStr);
+  render();
+}
+
+function deleteReminder(dateStr, index) {
+  var reminders = loadReminders();
+  if (reminders[dateStr]) {
+    reminders[dateStr].splice(index, 1);
+    if (reminders[dateStr].length === 0) {
+      delete reminders[dateStr];
+    }
+    saveReminders(reminders);
+  }
+  openRemindersSub(dateStr);
+  render();
 }
 
 /* ── ALARM AUDIO  — loud beep-beep-beep pattern ────────── */
@@ -1476,18 +1566,4 @@ function showPanelMsg(msg){
   var splash=document.getElementById('splash');
   var appWrap=document.getElementById('app-wrapper');
   setTimeout(function(){
-    splash.classList.add('fade-out');
-    appWrap.classList.add('visible');
-    setTimeout(function(){ splash.style.display='none'; },650);
-  },2300);
-})();
-
-render();
-var msToMidnight=function(){
-  var n=new Date();
-  return new Date(n.getFullYear(),n.getMonth(),n.getDate()+1)-n;
-};
-setTimeout(function(){ render(); setInterval(render,86400000); }, msToMidnight());
-</script>
-</body>
-</html>
+    s

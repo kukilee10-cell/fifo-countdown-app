@@ -733,16 +733,30 @@ function buildSpotifyUrls(rawUrl){
 }
 
 function doOpenSpotify(statusElId){
-  var sp     = loadSpotify();
-  var urls   = buildSpotifyUrls(sp.url);
-  var el     = statusElId ? document.getElementById(statusElId) : null;
+  var sp   = loadSpotify();
+  var urls = buildSpotifyUrls(sp.url);
+  var el   = statusElId ? document.getElementById(statusElId) : null;
   if(el){ el.textContent='Opening Spotify…'; el.className='spotify-status ok'; }
-  var t = Date.now();
+
+  // If the page goes hidden the app opened — cancel the web fallback.
+  var appOpened = false;
+  function onVisibilityChange(){
+    if(document.visibilityState === 'hidden'){
+      appOpened = true;
+    }
+  }
+  document.addEventListener('visibilitychange', onVisibilityChange);
+
   window.location.href = urls.app;
+
   setTimeout(function(){
-    if(Date.now()-t < 1800){ window.location.href = urls.web; }
-    if(el){ setTimeout(function(){ el.textContent=''; el.className='spotify-status'; },2000); }
-  }, 1200);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+    if(!appOpened){
+      // Spotify app did not open — fall back to web
+      window.location.href = urls.web;
+    }
+    if(el){ setTimeout(function(){ el.textContent=''; el.className='spotify-status'; }, 2000); }
+  }, 2500);
 }
 
 function openSpotify(){ doOpenSpotify(null); }
@@ -1157,6 +1171,7 @@ setTimeout(function(){ render(); setInterval(render,86400000); }, msToMidnight()
 </script>
 </body>
 </html>
+
 
 
 

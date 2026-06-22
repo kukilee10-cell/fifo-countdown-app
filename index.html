@@ -639,17 +639,19 @@ function startKeepAlive() {
   if (keepAliveInterval) return;
   keepAliveInterval = setInterval(function() {
     var ctx = getAudioCtx();
-    if (ctx && ctx.state === 'running') {
-      try {
-        var osc = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.05);
-      } catch(e) {}
+    if (!ctx) return;
+    if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+      ctx.resume().catch(function(){});
     }
+    try {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.05);
+    } catch(e) {}
   }, 10000);
 }
 
@@ -678,14 +680,35 @@ function playAlarmPattern(){
   beep(1318,0.30,0.75,t+0.65);
 }
 
-function startAlarmSound(){
-  stopAlarmSound();
-  var ctx = getAudioCtx();
-  if (ctx && (ctx.state === 'suspended' || ctx.state === 'interrupted')) {
-    ctx.resume().catch(function(){});
+function startAlarmSound(attempt){
+  attempt = attempt || 1;
+  if (attempt === 1) {
+    if(alarmBeepLoop){ clearInterval(alarmBeepLoop); alarmBeepLoop=null; }
   }
-  playAlarmPattern();
-  alarmBeepLoop=setInterval(playAlarmPattern, 1400);
+  var ctx = getAudioCtx();
+  if (!ctx) return;
+
+  var playBeeps = function() {
+    if(alarmBeepLoop){ clearInterval(alarmBeepLoop); alarmBeepLoop=null; }
+    playAlarmPattern();
+    alarmBeepLoop=setInterval(playAlarmPattern, 1400);
+  };
+
+  if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+    ctx.resume().then(function() {
+      playBeeps();
+    }).catch(function() {
+      playBeeps();
+      if (attempt < 4) {
+        setTimeout(function() { startAlarmSound(attempt + 1); }, 1000);
+      }
+    });
+  } else {
+    playBeeps();
+    if (ctx.state !== 'running' && attempt < 4) {
+      setTimeout(function() { startAlarmSound(attempt + 1); }, 1000);
+    }
+  }
 }
 
 function stopAlarmSound(){
@@ -735,13 +758,13 @@ function testAlarmSound() {
         testingAlarm = true;
         var btn = document.getElementById('test-sound-btn');
         if (btn) btn.textContent = '⏹️ Stop Test Sound';
-        startAlarmSound();
+        startAlarmSound(1);
       });
     } else {
       testingAlarm = true;
       var btn = document.getElementById('test-sound-btn');
       if (btn) btn.textContent = '⏹️ Stop Test Sound';
-      startAlarmSound();
+      startAlarmSound(1);
     }
   }
 }
@@ -789,12 +812,7 @@ function triggerAlarm(){
     'Alarm set for '+fmt12(loadAlarm().time)+' — '+now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
   document.getElementById('alarm-alert').classList.add('active');
   document.body.style.overflow='hidden';
-  var ctx=getAudioCtx();
-  if(ctx && (ctx.state==='suspended' || ctx.state==='interrupted')){ 
-    ctx.resume().then(startAlarmSound).catch(function(){ startAlarmSound(); }); 
-  } else { 
-    startAlarmSound(); 
-  }
+  startAlarmSound(1);
 }
 
 function stopAlarm(){

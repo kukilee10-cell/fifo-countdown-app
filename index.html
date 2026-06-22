@@ -138,8 +138,8 @@
   .logo span { color: var(--muted); }
   .settings-btn {
     background: var(--card); border: 1px solid var(--border); color: var(--text);
-    border-radius: 10px; padding: 11px 20px; font-family: var(--sans);
-    font-size: 15px; font-weight: 600; cursor: pointer;
+    border-radius: 10px; padding: 11px 14px; font-family: var(--sans);
+    font-size: 14px; font-weight: 600; cursor: pointer;
     transition: background 0.15s; min-height: 46px;
   }
   .settings-btn:active { background: var(--border); }
@@ -544,12 +544,21 @@
   <div class="alarm-alert-time" id="alarm-alert-time"></div>
 </div>
 
+<!-- ══ BEDTIME OVERLAY ════════════════════════════════════ -->
+<div id="bedtime-overlay" onclick="disableBedtime()" style="display: none; position: fixed; inset: 0; z-index: 99999; background: #000000; color: #3a4450; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; text-align: center; user-select: none; -webkit-user-select: none;">
+  <div style="font-size: 14px; font-family: sans-serif; opacity: 0.3; margin-bottom: 8px;">🌙 Bedtime Mode Active</div>
+  <div style="font-size: 11px; font-family: monospace; opacity: 0.15;">Screen Wake Lock is active. Tap anywhere to exit.</div>
+</div>
+
 <!-- ══ APP ═════════════════════════════════════════════════ -->
 <div id="app-wrapper">
 
 <header>
   <div class="logo">FIFO <span>// Countdown</span></div>
-  <button class="settings-btn" onclick="openPanel()">⚙&nbsp; Settings</button>
+  <div style="display: flex; gap: 8px;">
+    <button class="settings-btn" onclick="enableBedtime()">🌙&nbsp; Bedtime</button>
+    <button class="settings-btn" onclick="openPanel()">⚙&nbsp; Settings</button>
+  </div>
 </header>
 
 <main id="main-content"></main>
@@ -796,6 +805,61 @@ function initAudioOnFirstUserGesture() {
 initAudioOnFirstUserGesture();
 
 /* ══════════════════════════════════════════════════════════
+   WAKE LOCK & BEDTIME OVERLAY
+══════════════════════════════════════════════════════════ */
+var wakeLock = null;
+
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', function() {
+        wakeLock = null;
+      });
+    } catch (err) {
+      console.warn('Wake lock request failed:', err);
+    }
+  }
+}
+
+function releaseWakeLock() {
+  if (wakeLock) {
+    try {
+      wakeLock.release().then(function() {
+        wakeLock = null;
+      });
+    } catch(e) {
+      wakeLock = null;
+    }
+  }
+}
+
+function enableBedtime() {
+  var overlay = document.getElementById('bedtime-overlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+  }
+  requestWakeLock();
+}
+
+function disableBedtime() {
+  var overlay = document.getElementById('bedtime-overlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+  }
+  releaseWakeLock();
+}
+
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    var overlay = document.getElementById('bedtime-overlay');
+    if (overlay && overlay.style.display === 'flex') {
+      requestWakeLock();
+    }
+  }
+});
+
+/* ══════════════════════════════════════════════════════════
    ALARM TRIGGER / STOP / SNOOZE
 ══════════════════════════════════════════════════════════ */
 var alarmFired    = false;
@@ -805,6 +869,10 @@ var snoozeUntilTs = null;
 function triggerAlarm(){
   if(alarmFired) return;
   alarmFired=true;
+  
+  // Disable Bedtime mode immediately to display the alert screen
+  disableBedtime();
+
   // Activate Morning Mode
   setMorningActive(true);
   var now=new Date();

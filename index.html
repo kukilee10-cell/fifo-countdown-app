@@ -1162,6 +1162,17 @@ function showPanelMsg(msg){
 /* ══════════════════════════════════════════════════════════
    BOOT
 ══════════════════════════════════════════════════════════ */
+// Activate Morning Mode if app opened with ?morning=1
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  if(params.get('morning') === '1'){
+    setMorningActive(true);
+    // Remove ?morning=1 from the address bar cleanly
+    var clean = window.location.pathname + window.location.hash;
+    history.replaceState(null, '', clean);
+  }
+})();
+
 render();
 var msToMidnight=function(){
   var n=new Date();
@@ -1171,7 +1182,3 @@ setTimeout(function(){ render(); setInterval(render,86400000); }, msToMidnight()
 </script>
 </body>
 </html>
-
-
-
-

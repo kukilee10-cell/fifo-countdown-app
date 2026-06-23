@@ -26,8 +26,8 @@
     --accent:    #f5a623;
     --accent-dk: #c4831a;
     --danger:    #e05a4e;
-    --ok:        #4caf50;
-    --ok-dk:     #2e7d32;
+    --ok:        #10b981; /* UI Green */
+    --ok-dk:     #065f46;
     --spotify:   #1db954;
     --spotify-dk:#17a349;
     --text:      #e8ecf0;
@@ -130,7 +130,9 @@
   /* ── HEADER ─────────────────────────────────────────────── */
   header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
+    padding: 18px 20px 14px; 
+    padding-top: calc(12px + env(safe-area-inset-top)); /* WebView Notch Integration */
+    border-bottom: 1px solid var(--border);
     background: var(--surface); position: sticky; top: 0; z-index: 10;
   }
   .logo { font-family: var(--mono); font-size: 13px; font-weight: 500;
@@ -166,15 +168,15 @@
   }
   .cta-btn:active { background: var(--accent-dk); transform: scale(0.98); }
 
-  /* ── MORNING MODE CARD ──────────────────────────────────── */
-  .morning-card {
+  /* Shift Alert Card */
+  .shift-card {
     background: var(--card); border: 1px solid var(--border);
-    border-left: 4px solid var(--ok); border-radius: 16px;
+    border-left: 4px solid var(--accent); border-radius: 16px;
     padding: 16px 18px; display: flex; align-items: center; gap: 14px;
   }
-  .morning-card-icon { font-size: 26px; flex-shrink: 0; }
-  .morning-card-title { font-size: 15px; font-weight: 700; color: var(--ok); margin-bottom: 3px; }
-  .morning-card-sub   { font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .shift-card-icon { font-size: 26px; flex-shrink: 0; }
+  .shift-card-title { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 3px; }
+  .shift-card-sub   { font-size: 13px; color: var(--muted); line-height: 1.4; }
 
   /* ── HERO COUNTDOWN ─────────────────────────────────────── */
   .hero {
@@ -188,7 +190,10 @@
   .hero::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
     border-radius: 22px 22px 0 0;
-    background: linear-gradient(90deg, var(--accent-dk), var(--accent), var(--accent-dk));
+    background: var(--hero-accent, var(--accent));
+  }
+  .hero.on-rr::before {
+    background: var(--ok);
   }
   .hero-label {
     font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
@@ -200,7 +205,7 @@
     letter-spacing: -0.02em; overflow: visible; display: block; width: 100%;
   }
   .hero-number.danger { color: var(--danger); }
-  .hero-number.done   { color: var(--ok); }
+  .hero-number.done, .hero-number.ok { color: var(--ok); }
   .hero-unit {
     font-family: var(--mono); font-size: 16px; letter-spacing: 0.1em;
     text-transform: uppercase; color: var(--muted); margin-top: 4px;
@@ -273,9 +278,12 @@
     animation: alarmPulse 1s ease-in-out infinite alternate;
   }
   #alarm-alert.active { display: flex; }
+  
+  /* Amber flashing wake strobe animation */
   @keyframes alarmPulse {
-    from { background: #0a0c0e; }
-    to   { background: #071a09; }
+    0%   { background: #0a0c0e; }
+    50%  { background: #4a2702; } 
+    100% { background: #0a0c0e; }
   }
   .alarm-alert-icon {
     font-size: 80px; line-height: 1; margin-bottom: 28px;
@@ -372,14 +380,17 @@
     display: block; font-size: 12px; font-weight: 600; color: var(--muted);
     margin-bottom: 10px; letter-spacing: 0.06em; text-transform: uppercase;
   }
-  input[type="date"], input[type="number"] {
+  input[type="date"], input[type="number"], select {
     display: block; width: 100%; background: var(--card);
     border: 1.5px solid var(--border); border-radius: 14px; color: var(--text);
     font-family: var(--mono); font-size: 22px; padding: 16px 14px;
     outline: none; transition: border-color 0.15s; min-height: 58px;
     -webkit-appearance: none;
   }
-  input[type="date"]:focus, input[type="number"]:focus { border-color: var(--accent); }
+  select {
+    font-family: var(--sans); font-size: 16px; font-weight: 600;
+  }
+  input[type="date"]:focus, input[type="number"]:focus, select:focus { border-color: var(--accent); }
   input[type="number"]  { -moz-appearance: textfield; }
   input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; }
   .stepper { display: flex; align-items: center; gap: 12px; }
@@ -610,9 +621,7 @@ function saveReminders(d) {
   localStorage.setItem(REMINDERS_KEY, JSON.stringify(d));
 }
 
-/* ══════════════════════════════════════════════════════════
-   DATE HELPERS
-══════════════════════════════════════════════════════════ */
+/* ── DATE HELPERS ────────────────────────────────────────── */
 function today(){ var d=new Date(); d.setHours(0,0,0,0); return d; }
 function parseDate(s){ var p=s.split('-').map(Number); return new Date(p[0],p[1]-1,p[2]); }
 function formatDate(d){ return d.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'}); }
@@ -624,9 +633,7 @@ function fmt12(t){
   h=h%12||12; return h+':'+m+' '+ap;
 }
 
-/* ══════════════════════════════════════════════════════════
-   CALENDAR GENERATOR (With Navigation & Reminders)
-══════════════════════════════════════════════════════════ */
+/* ── CALENDAR GENERATOR (With Navigation & Reminders) ────── */
 var calYear = null;
 var calMonth = null;
 
@@ -671,6 +678,7 @@ function generateCalendarHTML() {
   var roster = loadRoster();
   var reminders = loadReminders();
   
+  // Goal 2: Footprint reduction - gap changed from 6px to 4px
   var h = '<div class="stat-card wide" style="padding: 16px 14px;">'
     + '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">'
       + '<div class="stat-label" style="margin-bottom: 0;">📅 ' + monthNames[calMonth] + ' ' + calYear + '</div>'
@@ -679,15 +687,17 @@ function generateCalendarHTML() {
         + '<button onclick="nextMonth()" style="background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 6px; width: 28px; height: 28px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">›</button>'
       + '</div>'
     + '</div>'
-    + '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; margin-top: 10px; font-size: 12px; font-family: var(--mono); justify-items: center;">';
+    + '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; font-size: 11px; font-family: var(--mono); justify-items: center;">';
   
   var daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"];
   for (var i = 0; i < 7; i++) {
-    h += '<div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-weight: 600; margin: 0 auto;">' + daysOfWeek[i] + '</div>';
+    // Goal 2: Day cell width & height changed to 26px
+    h += '<div style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-weight: 600; margin: 0 auto;">' + daysOfWeek[i] + '</div>';
   }
   
   for (var i = 0; i < startingDay; i++) {
-    h += '<div style="width: 28px; height: 28px; margin: 0 auto;"></div>';
+    // Goal 2: Empty cell width & height changed to 26px
+    h += '<div style="width: 26px; height: 26px; margin: 0 auto;"></div>';
   }
   
   for (var d = 1; d <= totalDays; d++) {
@@ -726,7 +736,8 @@ function generateCalendarHTML() {
       bg = 'rgba(255, 255, 255, 0.1)';
     }
     
-    h += '<button onclick="openRemindersSub(\'' + dateStr + '\')" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 500; border-radius: 50%; background: ' + bg + '; color: ' + color + '; border: ' + border + '; margin: 0 auto; cursor: pointer; position: relative; user-select: none; font-family: inherit; font-size: 12px; outline: none; -webkit-tap-highlight-color: transparent; padding: 0;">' 
+    // Goal 2: Active day cell button width & height changed to 26px, font-size adjusted to 11px
+    h += '<button onclick="openRemindersSub(\'' + dateStr + '\')" style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-weight: 500; border-radius: 50%; background: ' + bg + '; color: ' + color + '; border: ' + border + '; margin: 0 auto; cursor: pointer; position: relative; user-select: none; font-family: inherit; font-size: 11px; outline: none; -webkit-tap-highlight-color: transparent; padding: 0;">' 
       + d;
       
     if (hasReminder) {
@@ -1168,6 +1179,45 @@ function renderAlarmStatus(){
   }
 }
 
+/* ── DATA BACKUP & RESTORE ────────────────────────────── */
+function exportBackup() {
+  var backup = {
+    roster: localStorage.getItem(ROSTER_KEY),
+    alarm: localStorage.getItem(ALARM_KEY),
+    spotify: localStorage.getItem(SPOTIFY_KEY),
+    dont_forget: localStorage.getItem(DONT_FORGET_KEY),
+    notes: localStorage.getItem(NOTES_KEY),
+    reminders: localStorage.getItem(REMINDERS_KEY)
+  };
+  var fileBlob = new Blob([JSON.stringify(backup, null, 2)], {type: 'application/json'});
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(fileBlob);
+  link.download = 'fifo_countdown_backup.json';
+  link.click();
+}
+
+function importBackup(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (data.roster) localStorage.setItem(ROSTER_KEY, data.roster);
+      if (data.alarm) localStorage.setItem(ALARM_KEY, data.alarm);
+      if (data.spotify) localStorage.setItem(SPOTIFY_KEY, data.spotify);
+      if (data.dont_forget) localStorage.setItem(DONT_FORGET_KEY, data.dont_forget);
+      if (data.notes) localStorage.setItem(NOTES_KEY, data.notes);
+      if (data.reminders) localStorage.setItem(REMINDERS_KEY, data.reminders);
+      alert("Backup loaded successfully!");
+      window.location.reload();
+    } catch(err) {
+      alert("Error parsing backup file. Please make sure it's a valid backup JSON.");
+    }
+  };
+  reader.readAsText(file);
+}
+
 /* ── MAIN RENDER ───────────────────────────────────────── */
 function render(){
   var roster=loadRoster(), el=document.getElementById('main-content');
@@ -1186,6 +1236,7 @@ function render(){
   }
 
   var start=parseDate(roster.startDate), daysOn=parseInt(roster.daysOn,10), daysOff=parseInt(roster.daysOff,10);
+  var shiftType=roster.shiftType || 'day';
   var now=today(), elapsed=diffDays(start,now);
   var cycleLen=daysOn+daysOff, cycles=elapsed>=0?Math.floor(elapsed/cycleLen):0;
   var curStart=addDays(start,cycles*cycleLen), curFlyHome=addDays(curStart,daysOn), curEnd=addDays(curStart,cycleLen);
@@ -1197,21 +1248,58 @@ function render(){
   var offLeft=isOnSwing?daysOff:Math.max(0,daysOff-offGone);
   var pct=isOnSwing?Math.min(100,Math.round(((daysOn-daysLeft)/daysOn)*100)):Math.min(100,Math.round((offGone/daysOff)*100));
   var heroNum=isOnSwing?daysLeft:offLeft;
-  var hc=isOnSwing?(daysLeft<=2?'danger':''):'ok';
+  
+  // Hero countdown state colors
+  var hc = isOnSwing ? (daysLeft <= 2 ? 'danger' : '') : 'done'; 
+  var pbClass = isOnSwing ? '' : 'done'; 
 
   var h = '';
 
-  // Monthly Calendar Card
+  // Goal 2: Keep Calendar card at the very top (cell size is now 26px, grid gap 4px)
   h += generateCalendarHTML();
 
-  h += '<div class="hero">'
-      +'<div class="hero-label">'+(isOnSwing?'Days left on swing':'Days left at home')+'</div>'
+  // Goal 1: Today’s Status card directly below calendar with reduced padding & dynamic 🟠/🟢 status colors [23].
+  var statusColor = isOnSwing ? 'var(--accent)' : 'var(--ok)';
+  var statusDot = isOnSwing ? '🟠' : '🟢';
+  var statusText = isOnSwing ? 'On Site' : 'On R&R';
+
+  h += '<div class="stat-card wide" style="text-align: center; padding: 10px 14px; margin-bottom: 4px;">'
+    + '<div class="stat-label" style="margin-bottom: 4px;">📅 Today’s Status</div>'
+    + '<div class="stat-value" style="font-size: 15px; font-weight: 600; color: ' + statusColor + ';">'
+      + statusDot + ' ' + statusDotText + ' &bull; ' + formatDate(now)
+    + '</div>'
+    + '</div>';
+
+  // Day/Night Shift Indicator (Active only when working on-site)
+  if (isOnSwing) {
+    if (shiftType === 'night') {
+      h += '<div class="shift-card">'
+        + '<div class="shift-card-icon">🌙</div>'
+        + '<div>'
+          + '<div class="shift-card-title">Night Shift Active</div>'
+          + '<div class="shift-card-sub">Sleep tight during the day, mate. Block out that sun.</div>'
+        + '</div>'
+        + '</div>';
+    } else {
+      h += '<div class="shift-card" style="border-left-color: var(--ok);">'
+        + '<div class="shift-card-icon" style="filter: grayscale(0);">☀️</div>'
+        + '<div>'
+          + '<div class="shift-card-title" style="color: var(--ok);">Day Shift Active</div>'
+          + '<div class="shift-card-sub">Stay hydrated. Keep grinding under the heat.</div>'
+        + '</div>'
+        + '</div>';
+    }
+  }
+
+  // Goal 5: Keep Hero Card exactly as is (Green when on R&R, orange when on swing) [23]
+  h += '<div class="hero ' + (isOnSwing ? '' : 'on-rr') + '">'
+      +'<div class="hero-label">'+(isOnSwing?'⛏️ Days Left on Site':'🏡 Days Left at Home')+'</div>'
       +'<div class="hero-number '+hc+'">'+heroNum+'</div>'
       +'<div class="hero-unit">'+(heroNum===1?'day':'days')+'</div>'
       +'<div class="hero-sub">'+(isOnSwing
         ?'Fly home <strong>'+(daysLeft===0?'today! ✈️':formatDate(curFlyHome))+'</strong>'
         :'Back on site <strong>'+formatDate(nextSwing||curFlyHome)+'</strong>')+'</div>'
-      +'<div class="progress-wrap"><div class="progress-fill '+(isOnSwing?'':'done')+'" style="width:'+pct+'%"></div></div>'
+      +'<div class="progress-wrap"><div class="progress-fill '+pbClass+'" style="width:'+pct+'%"></div></div>'
       +'<div class="progress-label">'
         +'<span>'+(isOnSwing?'Day 1':'Fly-home')+'</span>'
         +'<span>'+pct+'%</span>'
@@ -1220,54 +1308,27 @@ function render(){
     +'</div>'
     +'<div class="stat-grid">';
 
-  if(isOnSwing){
-    h+='<div class="stat-card">'
-        +'<div class="stat-label">Swing Day</div>'
-        +'<div class="stat-value accent">'+dayOfSwing+' <span style="font-size:15px;color:var(--muted)">/ '+daysOn+'</span></div>'
-        +'<div class="stat-sub">of '+daysOn+' days on</div>'
+  // Goal 4: Replace Static Roster Pattern card with the next travel/return dates.
+  if (isOnSwing) {
+    h += '<div class="stat-card compact">'
+        +'<div class="stat-label">✈️ Fly Home</div>'
+        +'<div class="stat-value date-val" style="font-size: 15px; color: var(--accent);">' + formatDate(curFlyHome) + '</div>'
+        +'<div class="stat-sub">Next travel day</div>'
       +'</div>'
-      +'<div class="stat-card">'
-        +'<div class="stat-label">Days Left</div>'
-        +'<div class="stat-value '+(daysLeft<=2?'danger':'')+'">'+daysLeft+'</div>'
-        +'<div class="stat-sub">until fly-home</div>'
-      +'</div>'
-      +'<div class="stat-card wide compact">'
-        +'<div class="stat-label">Fly-home Date</div>'
-        +'<div class="stat-value date-val">'+formatDate(curFlyHome)+' ✈️</div>'
-      +'</div>'
-      +'<div class="stat-card">'
-        +'<div class="stat-label">Days Off</div>'
-        +'<div class="stat-value ok">'+daysOff+'</div>'
-        +'<div class="stat-sub">when you get home</div>'
-      +'</div>'
-      +'<div class="stat-card">'
-        +'<div class="stat-label">Back on Site</div>'
-        +'<div class="stat-value date-val">'+formatDate(addDays(curFlyHome,daysOff))+'</div>'
+      +'<div class="stat-card compact">'
+        +'<div class="stat-label">🛫 Return To Site</div>'
+        +'<div class="stat-value date-val" style="font-size: 15px; color: var(--text);">' + formatDate(addDays(curFlyHome, daysOff)) + '</div>'
+        +'<div class="stat-sub">Next roster start</div>'
       +'</div>';
   } else {
-    h+='<div class="stat-card wide">'
-        +'<div class="stat-label">You\'re home! 🏠</div>'
-        +'<div class="stat-value ok">'+offLeft+'</div>'
-        +'<div class="stat-sub">days off remaining</div>'
-      +'</div>'
-      +'<div class="stat-card wide compact">'
-        +'<div class="stat-label">Back on site</div>'
-        +'<div class="stat-value date-val">'+formatDate(nextSwing)+'</div>'
-      +'</div>'
-      +'<div class="stat-card">'
-        +'<div class="stat-label">Days Off Gone</div>'
-        +'<div class="stat-value">'+offGone+'</div>'
-        +'<div class="stat-sub">of '+daysOff+'</div>'
-      +'</div>'
-      +'<div class="stat-card">'
-        +'<div class="stat-label">Roster Pattern</div>'
-        +'<div class="stat-value">'+daysOn+'/'+daysOff+'</div>'
-        +'<div class="stat-sub">on / off</div>'
+    h += '<div class="stat-card wide compact" style="text-align: center;">'
+        +'<div class="stat-label">🛫 Return To Site</div>'
+        +'<div class="stat-value date-val" style="font-size: 16px; color: var(--ok);">' + formatDate(nextSwing || curEnd) + '</div>'
+        +'<div class="stat-sub">Next roster start</div>'
       +'</div>';
   }
 
   h+='</div>'
-    +'<div class="today-row"><div class="today-dot"></div>Today is '+formatDate(now)+' &bull; '+roster.daysOn+'/'+roster.daysOff+' roster</div>'
     +'<div class="alarm-status-row hidden" id="alarm-status-line"></div>';
 
   el.innerHTML=h;
@@ -1299,11 +1360,12 @@ function renderSettingsMenu(){
 
   var h='<div class="panel-handle"></div>'
     +'<div class="panel-title">Settings</div>'
-    +menuBtn('📅','Roster','Swing dates &amp; pattern','openSubRoster()')
+    +menuBtn('📅','Roster &amp; Shift','Swing dates, shifts &amp; pattern','openSubRoster()')
     +menuBtn('⏰','Alarm',alarmSub,'openSubAlarm()')
     +menuBtn('🎵','Spotify',spSub,'openSubSpotify()')
     +menuBtn('📌',"Don't Forget List",'Packing &amp; check-in list','openSubDontForget()')
-    +menuBtn('📝','Notes','Swing notes','openSubNotes()');
+    +menuBtn('📝','Notes','Swing notes','openSubNotes()')
+    +menuBtn('💾','Backup &amp; Restore','Backup local files offline','openSubBackup()');
   document.getElementById('settings-panel').innerHTML=h;
 }
 
@@ -1318,15 +1380,24 @@ function menuBtn(icon,label,sub,onclick){
 /* ── Roster subpage ────────────────────────────────────── */
 function openSubRoster(){
   var r=loadRoster();
-  var startVal='', onVal='14', offVal='7';
-  if(r){ startVal=r.startDate; onVal=r.daysOn; offVal=r.daysOff; }
+  var startVal='', onVal='14', offVal='7', shiftVal='day';
+  if(r){ startVal=r.startDate; onVal=r.daysOn; offVal=r.daysOff; shiftVal=r.shiftType||'day'; }
   else { var d=new Date(), pad=function(n){return String(n).padStart(2,'0');}; startVal=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
 
   var h='<div class="panel-handle"></div>'
-    +'<div class="panel-title">📅 Roster</div>'
+    +'<div class="panel-title">📅 Roster &amp; Shift</div>'
     +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
     +'<div class="p-section-head">Swing Start Date</div>'
     +'<div class="form-group"><label for="startDate">First day on site</label><input type="date" id="startDate" value="'+startVal+'"></div>'
+    +'<div class="p-divider"></div>'
+    +'<div class="p-section-head">Shift Type</div>'
+    +'<div class="form-group">'
+      +'<label for="shiftType">Day or Night Rotation</label>'
+      +'<select id="shiftType" style="width: 100%; border: 1.5px solid var(--border); background-color: var(--card); border-radius:14px; color: var(--text); padding: 16px 14px; outline: none;">'
+        +'<option value="day" '+(shiftVal==='day'?'selected':'')+'>☀️ Day Shift</option>'
+        +'<option value="night" '+(shiftVal==='night'?'selected':'')+'>🌙 Night Shift</option>'
+      +'</select>'
+    +'</div>'
     +'<div class="p-divider"></div>'
     +'<div class="p-section-head">Roster Pattern</div>'
     +'<div class="form-group"><label for="daysOn">Days ON</label><div class="stepper"><button class="step-btn" onclick="step(\'daysOn\',-1)">−</button><input type="number" id="daysOn" min="1" max="365" value="'+onVal+'"><button class="step-btn" onclick="step(\'daysOn\',1)">+</button></div></div>'
@@ -1338,12 +1409,13 @@ function openSubRoster(){
 
 function saveRosterSub(){
   var s=document.getElementById('startDate').value;
+  var shift=document.getElementById('shiftType').value;
   var on=parseInt(document.getElementById('daysOn').value,10);
   var off=parseInt(document.getElementById('daysOff').value,10);
   if(!s){ showPanelMsg('Please enter your swing start date.'); return; }
   if(!on||on<1){ showPanelMsg('Days ON must be at least 1.'); return; }
   if(!off||off<1){ showPanelMsg('Days OFF must be at least 1.'); return; }
-  saveRoster({startDate:s,daysOn:on,daysOff:off});
+  saveRoster({startDate:s,daysOn:on,daysOff:off,shiftType:shift});
   render();
   renderSettingsMenu();
 }
@@ -1543,6 +1615,24 @@ function saveNotesSub(silent){
   }
 }
 
+/* ── Backup subpage ────────────────────────────────────── */
+function openSubBackup(){
+  var h='<div class="panel-handle"></div>'
+    +'<div class="panel-title">💾 Backup &amp; Restore</div>'
+    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
+    +'<div class="p-section-head">Export Backup</div>'
+    +'<div class="form-group">'
+      +'<button class="panel-save-notes-btn" style="margin:0; width:100%;" onclick="exportBackup()">📤 Export Data to File</button>'
+    +'</div>'
+    +'<div class="p-divider"></div>'
+    +'<div class="p-section-head">Import Backup</div>'
+    +'<div class="form-group">'
+      +'<label for="import-file-input" style="cursor:pointer;" class="panel-save-notes-btn">📥 Select Backup File</label>'
+      +'<input type="file" id="import-file-input" accept=".json" onchange="importBackup(event)" style="display:none;">'
+    +'</div>';
+  document.getElementById('settings-panel').innerHTML=h;
+}
+
 /* ── Utility ───────────────────────────────────────────── */
 function step(id,delta){
   var el=document.getElementById(id), v=parseInt(el.value,10)||0;
@@ -1562,7 +1652,7 @@ function showPanelMsg(msg){
 /* ══════════════════════════════════════════════════════════
    SPLASH
 ══════════════════════════════════════════════════════════ */
-(function(){
+(function(){he
   var splash=document.getElementById('splash');
   var appWrap=document.getElementById('app-wrapper');
   setTimeout(function(){

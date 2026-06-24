@@ -567,7 +567,7 @@
 <header>
   <div class="logo">FIFO <span>// Countdown</span></div>
   <div style="display: flex; gap: 8px;">
-    <button class="settings-btn" onclick="enableBedtime()">🌙&nbsp; Bedtime</button>
+    <button class="settings-btn" id="bedtime-btn" onclick="toggleBedtime()">🌙&nbsp; Bedtime</button>
     <button class="settings-btn" onclick="openPanel()">⚙&nbsp; Settings</button>
   </div>
 </header>
@@ -683,8 +683,8 @@ function generateCalendarHTML() {
     + '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">'
       + '<div class="stat-label" style="margin-bottom: 0;">📅 ' + monthNames[calMonth] + ' ' + calYear + '</div>'
       + '<div style="display: flex; gap: 8px;">'
-        + '<button onclick="prevMonth()" style="background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 6px; width: 28px; height: 28px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">‹</button>'
-        + '<button onclick="nextMonth()" style="background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 6px; width: 28px; height: 28px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">›</button>'
+        + '<button onclick="prevMonth()" style="background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 8px; width: 36px; height: 36px; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none; -webkit-tap-highlight-color: transparent;">‹</button>'
+        + '<button onclick="nextMonth()" style="background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 8px; width: 36px; height: 36px; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none; -webkit-tap-highlight-color: transparent;">›</button>'
       + '</div>'
     + '</div>'
     + '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; font-size: 11px; font-family: var(--mono); justify-items: center;">';
@@ -902,9 +902,9 @@ function startAlarmSound(attempt){
   if (!ctx) return;
 
   var playBeeps = function() {
-    if(alarmBeepLoop){ clearInterval(alarmBeepLoop); alarmBeepLoop=null; }
+    if(alarmBeepLoop) return;
     playAlarmPattern();
-    alarmBeepLoop=setInterval(playAlarmPattern, 1400);
+    alarmBeepLoop = setInterval(playAlarmPattern, 1400);
   };
 
   if (silentAudioEl) {
@@ -917,14 +917,16 @@ function startAlarmSound(attempt){
     }).catch(function() {
       playBeeps();
       if (attempt < 4) {
-        setTimeout(function() { startAlarmSound(attempt + 1); }, 1000);
+        setTimeout(function() {
+          var c = getAudioCtx();
+          if (c && (c.state === 'suspended' || c.state === 'interrupted')) {
+            c.resume().catch(function(){});
+          }
+        }, 1000);
       }
     });
   } else {
     playBeeps();
-    if (ctx.state !== 'running' && attempt < 4) {
-      setTimeout(function() { startAlarmSound(attempt + 1); }, 1000);
-    }
   }
 }
 
@@ -1043,12 +1045,36 @@ function releaseWakeLock() {
   }
 }
 
+function updateBedtimeBtn(active){
+  var btn=document.getElementById('bedtime-btn');
+  if(!btn) return;
+  if(active){
+    btn.textContent='🌙\u00a0 Bedtime Active';
+    btn.style.borderColor='var(--ok)';
+    btn.style.color='var(--ok)';
+  } else {
+    btn.textContent='🌙\u00a0 Bedtime';
+    btn.style.borderColor='';
+    btn.style.color='';
+  }
+}
+
+function toggleBedtime(){
+  var overlay=document.getElementById('bedtime-overlay');
+  if(overlay && overlay.style.display==='flex'){
+    disableBedtime();
+  } else {
+    enableBedtime();
+  }
+}
+
 function enableBedtime() {
   var overlay = document.getElementById('bedtime-overlay');
   if (overlay) {
     overlay.style.display = 'flex';
   }
   requestWakeLock();
+  updateBedtimeBtn(true);
 
   var ctx = getAudioCtx();
   if (ctx) {
@@ -1065,6 +1091,7 @@ function disableBedtime() {
     overlay.style.display = 'none';
   }
   releaseWakeLock();
+  updateBedtimeBtn(false);
 }
 
 document.addEventListener('visibilitychange', function() {
@@ -1077,14 +1104,15 @@ document.addEventListener('visibilitychange', function() {
 });
 
 /* ── ALARM TRIGGER / STOP / SNOOZE ─────────────────────── */
-var alarmFired    = false;
-var snoozeTimer   = null;
-var snoozeUntilTs = null;
+var alarmFired       = false;
+var snoozeTimer      = null;
+var snoozeUntilTs    = null;
+var lastAlarmDateKey = null; /* "YYYY-MM-DD_HH:MM" — fires once per scheduled slot */
 
 function triggerAlarm(){
   if(alarmFired) return;
   alarmFired=true;
-  
+
   disableBedtime();
 
   var now=new Date();
@@ -1095,40 +1123,46 @@ function triggerAlarm(){
   startAlarmSound(1);
 }
 
+/* ✅ I'M UP — leave alarmFired=true so checkAlarm can't re-fire this minute */
 function stopAlarm(){
   stopAlarmSound();
   document.getElementById('alarm-alert').classList.remove('active');
   document.body.style.overflow='';
-  alarmFired=false;
   snoozeUntilTs=null;
   if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
   render();
 }
 
+/* 😴 SNOOZE — keep alarmFired=true during countdown; only clear inside timer */
 function snoozeAlarm(){
   stopAlarmSound();
   document.getElementById('alarm-alert').classList.remove('active');
   document.body.style.overflow='';
-  alarmFired=false;
   var alarm=loadAlarm();
   var mins=parseInt(alarm.snooze,10)||10;
   snoozeUntilTs=Date.now()+(mins*60000);
   if(snoozeTimer) clearTimeout(snoozeTimer);
   snoozeTimer=setTimeout(function(){
     snoozeUntilTs=null;
+    alarmFired=false;
     triggerAlarm();
   }, mins*60000);
 }
 
+/* checkAlarm — fires once per unique date+time key; 5 s interval */
 function checkAlarm(){
   if(snoozeUntilTs) return;
   var alarm=loadAlarm(); if(!alarm.on||!alarm.time) return;
   var now=new Date();
   var nowT=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  if(nowT===alarm.time&&!alarmFired) triggerAlarm();
-  if(nowT!==alarm.time&&alarmFired&&!document.getElementById('alarm-alert').classList.contains('active')) alarmFired=false;
+  var dateKey=now.toLocaleDateString('en-CA')+'_'+alarm.time;
+  if(nowT===alarm.time && lastAlarmDateKey!==dateKey){
+    lastAlarmDateKey=dateKey;
+    alarmFired=false;
+    triggerAlarm();
+  }
 }
-setInterval(checkAlarm,10000);
+setInterval(checkAlarm,5000);
 
 /* ── SPOTIFY DEEP LINK ─────────────────────────────────── */
 function buildSpotifyUrls(rawUrl){
@@ -1164,7 +1198,16 @@ function doOpenSpotify(statusElId){
   }, 2500);
 }
 
-function openSpotify(){ doOpenSpotify(null); }
+/* 🎵 OPEN SPOTIFY — acknowledged for this alarm cycle, then launch Spotify */
+function openSpotify(){
+  stopAlarmSound();
+  document.getElementById('alarm-alert').classList.remove('active');
+  document.body.style.overflow='';
+  snoozeUntilTs=null;
+  if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
+  doOpenSpotify(null);
+  render();
+}
 
 /* ── ALARM STATUS LINE (main screen) ───────────────────── */
 function renderAlarmStatus(){
@@ -1295,7 +1338,7 @@ function render(){
   h += '<div class="hero ' + (isOnSwing ? '' : 'on-rr') + '">'
       +'<div class="hero-label">'+(isOnSwing?'⛏️ Days Left on Site':'🏡 Days Left at Home')+'</div>'
       +'<div class="hero-number '+hc+'">'+heroNum+'</div>'
-      +'<div class="hero-unit">'+(heroNum===1?'day':'days')+'</div>'
+      +'<div class="hero-unit">'+(heroNum===1?'day left':'days left')+'</div>'
       +'<div class="hero-sub">'+(isOnSwing
         ?'Fly home <strong>'+(daysLeft===0?'today! ✈️':formatDate(curFlyHome))+'</strong>'
         :'Back on site <strong>'+formatDate(nextSwing||curFlyHome)+'</strong>')+'</div>'
@@ -1342,7 +1385,6 @@ function openPanel(){
   document.body.style.overflow='hidden';
 }
 function closePanel(){
-  stopAlarmSound();
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow='';
 }
@@ -1352,7 +1394,6 @@ function handleOverlayClick(e){
 
 /* ── Main menu ─────────────────────────────────────────── */
 function renderSettingsMenu(){
-  stopAlarmSound();
   var alarm=loadAlarm();
   var alarmSub=alarm.on?('Alarm on · '+fmt12(alarm.time)):'Alarm off';
   var sp=loadSpotify();
@@ -1403,6 +1444,10 @@ function openSubRoster(){
     +'<div class="form-group"><label for="daysOn">Days ON</label><div class="stepper"><button class="step-btn" onclick="step(\'daysOn\',-1)">−</button><input type="number" id="daysOn" min="1" max="365" value="'+onVal+'"><button class="step-btn" onclick="step(\'daysOn\',1)">+</button></div></div>'
     +'<div class="form-group"><label for="daysOff">Days OFF</label><div class="stepper"><button class="step-btn" onclick="step(\'daysOff\',-1)">−</button><input type="number" id="daysOff" min="1" max="365" value="'+offVal+'"><button class="step-btn" onclick="step(\'daysOff\',1)">+</button></div></div>'
     +'<button class="save-btn" onclick="saveRosterSub()">Save Roster</button>'
+    +'<div class="form-group" style="margin: 0 22px;">'
+      +'<button type="button" class="panel-save-notes-btn" style="margin:0; width:100%;" onclick="setTodayAsDay1()">📍 Set Today As Day 1</button>'
+      +'<div id="today-day1-msg" style="font-size:13px; color:var(--ok); padding:8px 0 0; min-height:20px;"></div>'
+    +'</div>'
     +'<button class="clear-btn" onclick="clearRosterSub()">Clear Roster</button>';
   document.getElementById('settings-panel').innerHTML=h;
 }
@@ -1424,6 +1469,22 @@ function clearRosterSub(){
   localStorage.removeItem(ROSTER_KEY);
   render();
   renderSettingsMenu();
+}
+
+function setTodayAsDay1(){
+  var r=loadRoster();
+  var on=parseInt((document.getElementById('daysOn')||{}).value,10) || (r?parseInt(r.daysOn,10):14);
+  var off=parseInt((document.getElementById('daysOff')||{}).value,10) || (r?parseInt(r.daysOff,10):7);
+  var shift=(document.getElementById('shiftType')||{}).value || (r?r.shiftType:'day') || 'day';
+  var d=new Date(), pad=function(n){return String(n).padStart(2,'0');};
+  var todayStr=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  saveRoster({startDate:todayStr, daysOn:on, daysOff:off, shiftType:shift});
+  /* Update the date input if the field is visible */
+  var dateEl=document.getElementById('startDate');
+  if(dateEl) dateEl.value=todayStr;
+  render();
+  var msg=document.getElementById('today-day1-msg');
+  if(msg){ msg.textContent='✓ Roster updated'; setTimeout(function(){ msg.textContent=''; },2500); }
 }
 
 /* ── Alarm subpage ─────────────────────────────────────── */
@@ -1453,6 +1514,10 @@ function openSubAlarm(){
     +'<div class="form-group" style="display:flex; flex-direction:column; gap:10px;">'
       +'<button type="button" class="panel-save-notes-btn" id="enable-sound-btn" style="margin:0; width:100%;" onclick="enableAlarmSound()">🔊 Enable Alarm Sound</button>'
       +'<button type="button" class="panel-save-notes-btn" id="test-sound-btn" style="margin:0; width:100%;" onclick="testAlarmSound()">🔊 Test Alarm Sound</button>'
+    +'</div>'
+    +'<div style="margin:18px 22px 0; background:rgba(224,90,78,0.08); border:1px solid rgba(224,90,78,0.25); border-radius:12px; padding:12px 14px;">'
+      +'<div style="font-size:12px; font-weight:700; color:var(--danger); margin-bottom:6px; letter-spacing:0.03em;">⚠️ Important</div>'
+      +'<div style="font-size:12px; color:var(--muted); line-height:1.55;">iPhone may stop web-based alarms if Safari is closed, the phone restarts, or iOS suspends background activity.<br><br>For best reliability, keep <strong style="color:var(--text);">Bedtime Mode active</strong> overnight.</div>'
     +'</div>';
   document.getElementById('settings-panel').innerHTML=h;
 
@@ -1496,13 +1561,19 @@ function saveAlarmSub(){
   var t=document.getElementById('alarm-time-input').value;
   if(!t){ showPanelMsg('Please pick a wake-up time.'); return; }
   var alarm=loadAlarm();
+  var prevTime=alarm.time;
   alarm.time=t;
   alarm.on=document.getElementById('alarm-toggle').checked;
   var activePill=document.querySelector('.snooze-pill.active');
   alarm.snooze=activePill?parseInt(activePill.dataset.min,10):(alarm.snooze||10);
   saveAlarm(alarm);
-  alarmFired=false; snoozeUntilTs=null;
-  if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
+  if(t !== prevTime){
+    alarmFired=false; snoozeUntilTs=null; lastAlarmDateKey=null;
+    if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
+  } else {
+    snoozeUntilTs=null;
+    if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer=null; }
+  }
   renderAlarmStatus();
   
   var ctx = getAudioCtx();

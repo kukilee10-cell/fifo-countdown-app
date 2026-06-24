@@ -55,7 +55,7 @@
   }
   #splash.fade-out { opacity: 0; pointer-events: none; }
   #splash::before {
-    content: ''; position: absolute; inset: 0;
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
     background-image:
       linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
@@ -866,10 +866,10 @@ function startKeepAlive() {
     }
     try {
       var osc = ctx.createOscillator();
-      var gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      var g = ctx.createGain();
+      osc.connect(g);
+      g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
       osc.start();
       osc.stop(ctx.currentTime + 0.05);
     } catch(e) {}
@@ -1089,6 +1089,7 @@ function updateBedtimeBtn(active){
   }
 }
 
+// Global toggle for Bedtime Mode
 function toggleBedtime(){
   var overlay=document.getElementById('bedtime-overlay');
   if(overlay && overlay.style.display==='flex'){
@@ -1182,32 +1183,36 @@ function snoozeAlarm(){
 /* 🎵 KEEP VIBING — open Spotify, snooze automatically for 5 mins, keep bedtime & audio controls active */
 function keepVibing() {
   stopAlarmSound();
+  releaseAudioControl();
+
   document.getElementById('alarm-alert').classList.remove('active');
-  document.body.style.overflow='';
+  document.body.style.overflow = '';
 
-  var sp   = loadSpotify();
+  var sp = loadSpotify();
   var urls = buildSpotifyUrls(sp.url);
-  var appOpened = false;
 
-  function onVisibilityChange() {
-    if (document.visibilityState === 'hidden') {
-      appOpened = true;
-    }
+  if (!urls.web && !urls.app) {
+    alert('Add your Spotify link in Settings first.');
+    return;
   }
-  document.addEventListener('visibilitychange', onVisibilityChange);
-
-  window.location.href = urls.app;
-
-  setTimeout(function() {
-    document.removeEventListener('visibilitychange', onVisibilityChange);
-    if (!appOpened) {
-      window.location.href = urls.web;
-    }
-  }, 2500);
 
   snoozeUntilTs = Date.now() + (5 * 60000);
 
-  enableBedtime();
+  // Try Spotify app first
+  if (urls.app) {
+    window.location.href = urls.app;
+
+    // Fallback to web link if app does not open
+    setTimeout(function() {
+      if (document.visibilityState !== 'hidden' && urls.web) {
+        window.location.href = urls.web;
+      }
+    }, 1500);
+
+  } else {
+    window.location.href = urls.web;
+  }
+
   render();
 }
 
@@ -1261,12 +1266,44 @@ function initAlarmState() {
 }
 
 /* ── SPOTIFY DEEP LINK ─────────────────────────────────── */
-function buildSpotifyUrls(rawUrl){
-  var web = (rawUrl||'').trim() || 'https://open.spotify.com';
-  var app = 'spotify://';
-  var m   = web.match(/open\.spotify\.com\/(track|album|playlist|artist|show|episode)\/([A-Za-z0-9]+)/);
-  if(m){ app = 'spotify:' + m[1] + ':' + m[2]; }
-  return {app:app, web:web};
+function buildSpotifyUrls(rawUrl) {
+  var raw = (rawUrl || '').trim();
+
+  if (!raw) {
+    return {
+      app: '',
+      web: ''
+    };
+  }
+
+  // Remove tracking junk after ?
+  var clean = raw.split('?')[0];
+
+  // If user pasted Spotify URI
+  if (clean.toLowerCase().startsWith('spotify:')) {
+    var parts = clean.split(':');
+    if (parts.length >= 3) {
+      return {
+        app: clean,
+        web: 'https://open.spotify.com/' + parts[1] + '/' + parts[2]
+      };
+    }
+  }
+
+  // If user pasted normal open.spotify.com link
+  var match = clean.match(/\/(track|album|playlist|artist|show|episode)\/([A-Za-z0-9\-_]+)/i);
+
+  if (match) {
+    return {
+      app: 'spotify:' + match[1] + ':' + match[2],
+      web: clean
+    };
+  }
+
+  return {
+    app: '',
+    web: clean
+  };
 }
 
 function doOpenSpotify(statusElId){
@@ -1275,7 +1312,16 @@ function doOpenSpotify(statusElId){
   var sp   = loadSpotify();
   var urls = buildSpotifyUrls(sp.url);
   var el   = statusElId ? document.getElementById(statusElId) : null;
-  if(el){ el.textContent='Opening Spotify…'; el.className='spotify-status ok'; }
+
+  if (!urls.web && !urls.app) {
+    if (el) {
+      el.textContent = 'Add Spotify link first';
+      el.className = 'spotify-status err';
+    } else {
+      alert('Add your Spotify link in Settings first.');
+    }
+    return;
+  }
 
   var appOpened = false;
   function onVisibilityChange(){
@@ -1283,9 +1329,14 @@ function doOpenSpotify(statusElId){
       appOpened = true;
     }
   }
-  document.addEventListener('visibilitychange', onVisibilityChange);
 
-  window.location.href = urls.app;
+  if (urls.app) {
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.location.href = urls.app;
+  } else {
+    window.location.href = urls.web;
+    return;
+  }
 
   setTimeout(function(){
     document.removeEventListener('visibilitychange', onVisibilityChange);
@@ -1708,7 +1759,7 @@ function saveSpotifySub(){
 
 /* ── Don't Forget subpage ──────────────────────────────── */
 function openSubDontForget(){
-  var saved=localStorage.getItem(DONT_FORGET_KEY)||';';
+  var saved=localStorage.getItem(DONT_FORGET_KEY)||'';
   var h='<div class="panel-handle"></div>'
     +'<div class="panel-title">📌 Don\'t Forget List</div>'
     +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'

@@ -251,85 +251,16 @@
   }
   .stat-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-  /* ── TODAY / ALARM STATUS ROWS ──────────────────────────── */
-  .today-row {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 14px; color: var(--muted); padding: 4px 2px;
+  /* ── SPOTIFY MAIN DASHBOARD BUTTON ──────────────────────── */
+  .spotify-btn {
+    width: 100%; background: var(--spotify); color: #000; border: none;
+    border-radius: 16px; padding: 16px 20px; font-family: var(--sans);
+    font-size: 16px; font-weight: 700; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; gap: 10px; min-height: 52px;
+    margin-top: 4px; transition: background 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
   }
-  .today-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent); flex-shrink: 0;
-  }
-  .alarm-status-row {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 14px; color: var(--muted); padding: 0 2px;
-    font-family: var(--mono);
-  }
-  .alarm-status-row .alarm-status-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
-    flex-shrink: 0; box-shadow: 0 0 6px rgba(245,166,35,0.6);
-  }
-
-  /* ── WAKE-UP ALERT ──────────────────────────────────────── */
-  #alarm-alert {
-    display: none; position: fixed; inset: 0; z-index: 9999;
-    background: #0a0c0e; flex-direction: column; align-items: center;
-    justify-content: center; text-align: center; padding: 40px 28px;
-    animation: alarmPulse 1s ease-in-out infinite alternate;
-  }
-  #alarm-alert.active { display: flex; }
-  
-  /* Amber flashing wake strobe animation */
-  @keyframes alarmPulse {
-    0%   { background: #0a0c0e; }
-    50%  { background: #4a2702; } 
-    100% { background: #0a0c0e; }
-  }
-  .alarm-alert-icon {
-    font-size: 80px; line-height: 1; margin-bottom: 28px;
-    animation: alarmBounce 0.6s ease infinite alternate;
-  }
-  @keyframes alarmBounce {
-    from { transform: scale(1); }
-    to   { transform: scale(1.14); }
-  }
-  .alarm-alert-title {
-    font-family: var(--mono); font-size: clamp(38px,10vw,58px); font-weight: 500;
-    color: var(--accent); letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 12px;
-  }
-  .alarm-alert-sub {
-    font-size: 18px; color: var(--muted); margin-bottom: 52px; line-height: 1.5;
-  }
-  .stop-alarm-btn {
-    background: var(--ok); color: #fff; border: none; border-radius: 20px;
-    padding: 24px 48px; font-family: var(--sans); font-size: 21px; font-weight: 700;
-    cursor: pointer; letter-spacing: 0.04em; min-height: 72px; width: 100%;
-    max-width: 340px; box-shadow: 0 0 48px rgba(76,175,80,0.45);
-    transition: transform 0.1s;
-  }
-  .stop-alarm-btn:active { transform: scale(0.96); background: var(--ok-dk); }
-  .alarm-alert-time {
-    font-family: var(--mono); font-size: 14px; color: var(--muted); margin-top: 28px;
-    line-height: 1.6;
-  }
-  .alarm-alert-btns {
-    display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 340px;
-  }
-  .snooze-alarm-btn {
-    background: var(--card); color: var(--accent); border: 1.5px solid var(--accent);
-    border-radius: 20px; padding: 20px; font-family: var(--sans); font-size: 18px;
-    font-weight: 700; cursor: pointer; letter-spacing: 0.02em; min-height: 62px;
-    width: 100%; transition: background 0.15s, transform 0.1s;
-  }
-  .snooze-alarm-btn:active { background: rgba(245,166,35,0.1); transform: scale(0.96); }
-  .alarm-spotify-btn {
-    background: var(--spotify); color: #000; border: none;
-    border-radius: 20px; padding: 20px; font-family: var(--sans); font-size: 18px;
-    font-weight: 700; cursor: pointer; letter-spacing: 0.02em; min-height: 62px;
-    width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
-    transition: background 0.15s, transform 0.1s;
-  }
-  .alarm-spotify-btn:active { background: var(--spotify-dk); transform: scale(0.96); }
+  .spotify-btn:active { background: var(--spotify-dk); transform: scale(0.98); }
 
   /* ── SETTINGS OVERLAY ───────────────────────────────────── */
   .overlay {
@@ -430,49 +361,6 @@
   .panel-row-label { font-size: 15px; font-weight: 600; color: var(--text); }
   .panel-row-sub   { font-size: 13px; color: var(--muted); margin-top: 2px; }
 
-  /* ── TOGGLE SWITCH ──────────────────────────────────────── */
-  .toggle-status { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em;
-    color: var(--muted); min-width: 28px; text-align: right; }
-  .toggle-status.on { color: var(--accent); }
-  .toggle { position: relative; width: 54px; height: 30px; flex-shrink: 0; cursor: pointer; }
-  .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-track { position: absolute; inset: 0; background: var(--border);
-    border-radius: 99px; transition: background 0.2s; }
-  .toggle input:checked + .toggle-track { background: var(--accent); }
-  .toggle-thumb {
-    position: absolute; top: 4px; left: 4px; width: 22px; height: 22px;
-    background: #fff; border-radius: 50%; transition: transform 0.2s;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.4); pointer-events: none;
-  }
-  .toggle input:checked ~ .toggle-thumb { transform: translateX(24px); }
-  .toggle-inline { display: flex; align-items: center; gap: 10px; }
-
-  /* ── TIME + SNOOZE ──────────────────────────────────────── */
-  .time-input {
-    width: 100%; background: var(--card); border: 1.5px solid var(--border);
-    border-radius: 14px; color: var(--text); font-family: var(--mono);
-    font-size: 24px; padding: 16px; outline: none;
-    transition: border-color 0.15s; min-height: 58px;
-    -webkit-appearance: none; text-align: center;
-  }
-  .time-input:focus { border-color: var(--accent); }
-  .snooze-pills { display: flex; gap: 10px; }
-  .snooze-pill {
-    flex: 1; background: var(--card); border: 1.5px solid var(--border);
-    color: var(--muted); border-radius: 12px; padding: 14px 8px;
-    font-family: var(--sans); font-size: 14px; font-weight: 600;
-    cursor: pointer; text-align: center; min-height: 50px;
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
-  }
-  .snooze-pill.active { background: rgba(245,166,35,0.12); border-color: var(--accent); color: var(--accent); }
-  .panel-save-btn {
-    display: block; width: calc(100% - 44px); margin: 4px 22px 0;
-    background: var(--accent); color: #000; border: none; border-radius: 14px;
-    padding: 17px; font-family: var(--sans); font-size: 16px; font-weight: 700;
-    cursor: pointer; min-height: 54px; transition: background 0.15s, transform 0.1s;
-  }
-  .panel-save-btn:active { background: var(--accent-dk); transform: scale(0.98); }
-
   /* ── SPOTIFY ────────────────────────────────────────────── */
   .spotify-url-input {
     width: 100%; background: var(--card); border: 1.5px solid var(--border);
@@ -537,39 +425,12 @@
   <div class="splash-loading-label">Loading&hellip;</div>
 </div>
 
-<!-- ══ WAKE-UP ALERT ═══════════════════════════════════════ -->
-<div id="alarm-alert" role="alertdialog" aria-modal="true">
-  <div class="alarm-alert-icon">⏰</div>
-  <div class="alarm-alert-title">Wake up<br>legend</div>
-  <div class="alarm-alert-sub">Time to get moving mate</div>
-  <div class="alarm-alert-btns">
-    <button class="stop-alarm-btn" onclick="stopAlarm()">✅ &nbsp;I'M UP</button>
-    <button class="snooze-alarm-btn" onclick="snoozeAlarm()">😴 &nbsp;Snooze Again</button>
-    <button class="alarm-spotify-btn" onclick="keepVibing()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.623.623 0 01-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 01-.277-1.215c3.809-.87 7.076-.496 9.712 1.115a.623.623 0 01.207.857zm1.223-2.722a.78.78 0 01-1.072.257c-2.687-1.652-6.785-2.131-9.965-1.166a.78.78 0 01-.973-.519.781.781 0 01.519-.972c3.632-1.102 8.147-.568 11.234 1.328a.78.78 0 01.257 1.072zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71a.937.937 0 11-.543-1.794c3.532-1.072 9.404-.865 13.115 1.338a.937.937 0 01-.955 1.613z"/>
-      </svg>
-      🎵 KEEP VIBING (+5 MIN)
-    </button>
-  </div>
-  <div class="alarm-alert-time" id="alarm-alert-time"></div>
-</div>
-
-<!-- ══ BEDTIME OVERLAY ════════════════════════════════════ -->
-<div id="bedtime-overlay" onclick="disableBedtime()" style="display: none; position: fixed; inset: 0; z-index: 99999; background: #000000; color: #3a4450; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; text-align: center; user-select: none; -webkit-user-select: none;">
-  <div style="font-size: 14px; font-family: sans-serif; opacity: 0.3; margin-bottom: 8px;">🌙 Bedtime Mode Active</div>
-  <div style="font-size: 11px; font-family: monospace; opacity: 0.15;">Screen Wake Lock is active. Tap anywhere to exit.</div>
-</div>
-
 <!-- ══ APP ═════════════════════════════════════════════════ -->
 <div id="app-wrapper">
 
 <header>
   <div class="logo">FIFO <span>// Countdown</span></div>
-  <div style="display: flex; gap: 8px;">
-    <button class="settings-btn" id="bedtime-btn" onclick="toggleBedtime()">🌙&nbsp; Bedtime</button>
-    <button class="settings-btn" onclick="openPanel()">⚙&nbsp; Settings</button>
-  </div>
+  <button class="settings-btn" onclick="openPanel()">⚙&nbsp; Settings</button>
 </header>
 
 <main id="main-content"></main>
@@ -588,7 +449,6 @@
    STORAGE
 ══════════════════════════════════════════════════════════ */
 var ROSTER_KEY       = 'fifo_roster_v1';
-var ALARM_KEY        = 'fifo_alarm_v1';
 var SPOTIFY_KEY      = 'fifo_spotify_v1';
 var DONT_FORGET_KEY  = 'fifo_dont_forget_v1';
 var NOTES_KEY        = 'fifo_notes_v1';
@@ -598,12 +458,6 @@ function loadRoster(){
   try{ var r=localStorage.getItem(ROSTER_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
 }
 function saveRoster(d){ localStorage.setItem(ROSTER_KEY,JSON.stringify(d)); }
-
-function loadAlarm(){
-  try{ var r=localStorage.getItem(ALARM_KEY); return r?JSON.parse(r):{time:'06:00',on:false,snooze:10}; }
-  catch(e){ return {time:'06:00',on:false,snooze:10}; }
-}
-function saveAlarm(d){ localStorage.setItem(ALARM_KEY,JSON.stringify(d)); }
 
 function loadSpotify(){
   try{ var r=localStorage.getItem(SPOTIFY_KEY); return r?JSON.parse(r):{url:''}; }
@@ -824,447 +678,6 @@ function deleteReminder(dateStr, index) {
   render();
 }
 
-/* ── ALARM AUDIO  — loud beep-beep-beep pattern ────────── */
-var audioCtx=null, alarmBeepLoop=null, keepAliveInterval=null;
-var testingAlarm = false;
-var silentAudioEl = null;
-var audioReleasedForSpotify = false;
-
-function getAudioCtx(){
-  if(!audioCtx){ try{ audioCtx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
-  return audioCtx;
-}
-
-function playSilentLoop() {
-  if (audioReleasedForSpotify) return;
-  if (!silentAudioEl) {
-    silentAudioEl = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
-    silentAudioEl.loop = true;
-  }
-  if (silentAudioEl.paused) {
-    silentAudioEl.play().catch(function(e) {
-      console.warn("Silent loop autoplay blocked:", e);
-    });
-  }
-}
-
-function startKeepAlive() {
-  if (audioReleasedForSpotify) return;
-  if (keepAliveInterval) return;
-  keepAliveInterval = setInterval(function() {
-    if (audioReleasedForSpotify) {
-      if (keepAliveInterval) {
-        clearInterval(keepAliveInterval);
-        keepAliveInterval = null;
-      }
-      return;
-    }
-    var ctx = getAudioCtx();
-    if (!ctx) return;
-    if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
-      return;
-    }
-    try {
-      var osc = ctx.createOscillator();
-      var g = ctx.createGain();
-      osc.connect(g);
-      g.connect(ctx.destination);
-      g.gain.setValueAtTime(0.0001, ctx.currentTime);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.05);
-    } catch(e) {}
-  }, 10000);
-}
-
-function beep(freq,dur,vol,when){
-  var ctx=getAudioCtx(); if(!ctx) return;
-  try{
-    if (ctx.state === 'interrupted') {
-      ctx.resume().catch(function(){});
-    }
-    var o=ctx.createOscillator(), g=ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.type='square'; o.frequency.setValueAtTime(freq, when||ctx.currentTime);
-    g.gain.setValueAtTime(vol||0.5, when||ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,(when||ctx.currentTime)+dur);
-    o.start(when||ctx.currentTime); o.stop((when||ctx.currentTime)+dur+0.01);
-  }catch(e){}
-}
-
-function playAlarmPattern(){
-  /* Three sharp blasts at high volume */
-  var ctx=getAudioCtx(); if(!ctx) return;
-  var t=ctx.currentTime;
-  beep(1046,0.14,0.7,t);
-  beep(1046,0.14,0.7,t+0.20);
-  beep(1046,0.14,0.7,t+0.40);
-  beep(1318,0.30,0.75,t+0.65);
-}
-
-function startAlarmSound(attempt){
-  attempt = attempt || 1;
-  if (attempt === 1) {
-    if(alarmBeepLoop){ clearInterval(alarmBeepLoop); alarmBeepLoop=null; }
-  }
-  if (audioReleasedForSpotify) return;
-  var ctx = getAudioCtx();
-  if (!ctx) return;
-
-  var playBeeps = function() {
-    if(alarmBeepLoop) return;
-    playAlarmPattern();
-    alarmBeepLoop = setInterval(playAlarmPattern, 1400);
-  };
-
-  if (silentAudioEl && !audioReleasedForSpotify) {
-    if (silentAudioEl.paused) {
-      silentAudioEl.play().catch(function(){});
-    }
-  }
-
-  if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
-    ctx.resume().then(function() {
-      playBeeps();
-    }).catch(function() {
-      playBeeps();
-      if (attempt < 4) {
-        setTimeout(function() {
-          var c = getAudioCtx();
-          if (c && (c.state === 'suspended' || c.state === 'interrupted')) {
-            c.resume().catch(function(){});
-          }
-        }, 1000);
-      }
-    });
-  } else {
-    playBeeps();
-  }
-}
-
-function stopAlarmSound(){
-  if(alarmBeepLoop){ clearInterval(alarmBeepLoop); alarmBeepLoop=null; }
-  testingAlarm = false;
-  var btn = document.getElementById('test-sound-btn');
-  if (btn) btn.textContent = '🔊 Test Alarm Sound';
-}
-
-function enableAlarmSound() {
-  audioReleasedForSpotify = false;
-  var ctx = getAudioCtx();
-  if (ctx) {
-    if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
-      ctx.resume().then(function() {
-        beep(880, 0.15, 0.3);
-        startKeepAlive();
-        playSilentLoop();
-        updateEnableBtn();
-      }).catch(function(e) {
-        console.error(e);
-      });
-    } else {
-      beep(880, 0.15, 0.3);
-      startKeepAlive();
-      playSilentLoop();
-      updateEnableBtn();
-    }
-  }
-}
-
-function updateEnableBtn() {
-  var btn = document.getElementById('enable-sound-btn');
-  if (btn) {
-    btn.textContent = '✅ Alarm Sound Enabled';
-    btn.style.borderColor = 'var(--ok)';
-    btn.style.color = 'var(--ok)';
-  }
-}
-
-function testAlarmSound() {
-  audioReleasedForSpotify = false;
-  var ctx = getAudioCtx();
-  if (!ctx) return;
-  if (testingAlarm) {
-    stopAlarmSound();
-  } else {
-    playSilentLoop();
-    if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
-      ctx.resume().then(function() {
-        startKeepAlive();
-        testingAlarm = true;
-        var btn = document.getElementById('test-sound-btn');
-        if (btn) btn.textContent = '⏹️ Stop Test Sound';
-        startAlarmSound(1);
-      });
-    } else {
-      testingAlarm = true;
-      var btn = document.getElementById('test-sound-btn');
-      if (btn) btn.textContent = '⏹️ Stop Test Sound';
-      startAlarmSound(1);
-    }
-  }
-}
-
-function releaseAudioControl() {
-  audioReleasedForSpotify = true;
-  stopAlarmSound();
-  if (keepAliveInterval) {
-    clearInterval(keepAliveInterval);
-    keepAliveInterval = null;
-  }
-  if (silentAudioEl) {
-    try {
-      silentAudioEl.pause();
-    } catch(e){}
-  }
-  if (audioCtx) {
-    audioCtx.suspend().catch(function(){});
-  }
-}
-
-function initAudioOnFirstUserGesture() {
-  var unlock = function() {
-    var ctx = getAudioCtx();
-    if (ctx) {
-      if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
-        ctx.resume().then(function() {
-          startKeepAlive();
-          removeListeners();
-        }).catch(function() {
-          playSilentLoop();
-        });
-      } else {
-        startKeepAlive();
-        removeListeners();
-      }
-    }
-  };
-  function removeListeners() {
-    document.removeEventListener('click', unlock);
-    document.removeEventListener('touchstart', unlock);
-  }
-  document.addEventListener('click', unlock);
-  document.addEventListener('touchstart', unlock);
-}
-initAudioOnFirstUserGesture();
-
-/* ── WAKE LOCK & BEDTIME OVERLAY ───────────────────────── */
-var wakeLock = null;
-
-async function requestWakeLock() {
-  if ('wakeLock' in navigator) {
-    try {
-      wakeLock = await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener('release', function() {
-        wakeLock = null;
-      });
-    } catch (err) {
-      console.warn('Wake lock request failed:', err);
-    }
-  }
-}
-
-function releaseWakeLock() {
-  if (wakeLock) {
-    try {
-      wakeLock.release().then(function() {
-        wakeLock = null;
-      });
-    } catch(e) {
-      wakeLock = null;
-    }
-  }
-}
-
-function updateBedtimeBtn(active){
-  var btn=document.getElementById('bedtime-btn');
-  if(!btn) return;
-  if(active){
-    btn.textContent='🌙\u00a0 Bedtime Active';
-    btn.style.borderColor='var(--ok)';
-    btn.style.color='var(--ok)';
-  } else {
-    btn.textContent='🌙\u00a0 Bedtime';
-    btn.style.borderColor='';
-    btn.style.color='';
-  }
-}
-
-// Global toggle for Bedtime Mode
-function toggleBedtime(){
-  var overlay=document.getElementById('bedtime-overlay');
-  if(overlay && overlay.style.display==='flex'){
-    disableBedtime();
-  } else {
-    enableBedtime();
-  }
-}
-
-function enableBedtime() {
-  audioReleasedForSpotify = false;
-  var overlay = document.getElementById('bedtime-overlay');
-  if (overlay) {
-    overlay.style.display = 'flex';
-  }
-  requestWakeLock();
-  updateBedtimeBtn(true);
-
-  var ctx = getAudioCtx();
-  if (ctx) {
-    ctx.resume().then(function() {
-      startKeepAlive();
-    }).catch(function(){});
-  }
-  playSilentLoop();
-}
-
-function disableBedtime() {
-  var overlay = document.getElementById('bedtime-overlay');
-  if (overlay) {
-    overlay.style.display = 'none';
-  }
-  releaseWakeLock();
-  updateBedtimeBtn(false);
-}
-
-document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible') {
-    var overlay = document.getElementById('bedtime-overlay');
-    if (overlay && overlay.style.display === 'flex') {
-      requestWakeLock();
-    }
-    var ctx = getAudioCtx();
-    if (ctx && (ctx.state === 'suspended' || ctx.state === 'interrupted') && !audioReleasedForSpotify) {
-      ctx.resume().catch(function(){});
-    }
-  }
-});
-
-/* ── ALARM TRIGGER / STOP / SNOOZE ─────────────────────── */
-var alarmFired       = false;
-var snoozeUntilTs    = null;
-var lastAlarmDateKey = null; /* "YYYY-MM-DD_HH:MM" — fires once per scheduled slot */
-
-function triggerAlarm(){
-  if(alarmFired) return;
-  alarmFired=true;
-
-  audioReleasedForSpotify = false; /* Guard against permanent silencing if Spotify was previously run */
-  disableBedtime();
-
-  var now=new Date();
-  document.getElementById('alarm-alert-time').textContent=
-    'Alarm set for '+fmt12(loadAlarm().time)+' — '+now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
-  document.getElementById('alarm-alert').classList.add('active');
-  document.body.style.overflow='hidden';
-  startAlarmSound(1);
-}
-
-/* ✅ I'M UP — leave alarmFired=true so checkAlarm can't re-fire this minute */
-function stopAlarm(){
-  stopAlarmSound();
-  document.getElementById('alarm-alert').classList.remove('active');
-  document.body.style.overflow='';
-  snoozeUntilTs=null;
-  disableBedtime();
-  render();
-}
-
-/* 😴 SNOOZE — keep alarmFired=true during countdown; only clear inside timer */
-function snoozeAlarm(){
-  stopAlarmSound();
-  document.getElementById('alarm-alert').classList.remove('active');
-  document.body.style.overflow='';
-  var alarm=loadAlarm();
-  var mins=parseInt(alarm.snooze,10)||10;
-  snoozeUntilTs=Date.now()+(mins*60000);
-  enableBedtime();
-}
-
-/* 🎵 KEEP VIBING — open Spotify, snooze automatically for 5 mins, keep bedtime & audio controls active */
-function keepVibing() {
-  stopAlarmSound();
-  releaseAudioControl();
-
-  document.getElementById('alarm-alert').classList.remove('active');
-  document.body.style.overflow = '';
-
-  var sp = loadSpotify();
-  var urls = buildSpotifyUrls(sp.url);
-
-  if (!urls.web && !urls.app) {
-    alert('Add your Spotify link in Settings first.');
-    return;
-  }
-
-  snoozeUntilTs = Date.now() + (5 * 60000);
-
-  // Try Spotify app first
-  if (urls.app) {
-    window.location.href = urls.app;
-
-    // Fallback to web link if app does not open
-    setTimeout(function() {
-      if (document.visibilityState !== 'hidden' && urls.web) {
-        window.location.href = urls.web;
-      }
-    }, 1500);
-
-  } else {
-    window.location.href = urls.web;
-  }
-
-  render();
-}
-
-/* checkAlarm — fires once per unique date+time key; 5 s interval */
-function checkAlarm(){
-  var now = Date.now();
-  if (snoozeUntilTs) {
-    if (now >= snoozeUntilTs) {
-      snoozeUntilTs = null;
-      alarmFired = false;
-      triggerAlarm();
-    }
-    return;
-  }
-  
-  var alarm = loadAlarm(); if (!alarm.on || !alarm.time) return;
-  var nowD = new Date();
-  var dateKey = nowD.getFullYear() + '-' + String(nowD.getMonth() + 1).padStart(2, '0') + '-' + String(nowD.getDate()).padStart(2, '0') + '_' + alarm.time;
-  
-  var timeParts = alarm.time.split(':');
-  var sched = new Date();
-  sched.setHours(parseInt(timeParts[0],10), parseInt(timeParts[1],10), 0, 0);
-
-  if (nowD >= sched && lastAlarmDateKey !== dateKey) {
-    if (nowD.getTime() - sched.getTime() < 2 * 60 * 60 * 1000) {
-      lastAlarmDateKey = dateKey;
-      alarmFired = false;
-      triggerAlarm();
-    }
-  }
-}
-setInterval(checkAlarm, 5000);
-
-/* Prevents the alarm from automatically firing upon config updates or app starts if the time is already in the past */
-function initAlarmState() {
-  var alarm = loadAlarm();
-  if (alarm.on && alarm.time) {
-    var nowD = new Date();
-    var dateKey = nowD.getFullYear() + '-' + String(nowD.getMonth() + 1).padStart(2, '0') + '-' + String(nowD.getDate()).padStart(2, '0') + '_' + alarm.time;
-    var timeParts = alarm.time.split(':');
-    var sched = new Date();
-    sched.setHours(parseInt(timeParts[0],10), parseInt(timeParts[1],10), 0, 0);
-    if (nowD >= sched) {
-      lastAlarmDateKey = dateKey;
-    } else {
-      lastAlarmDateKey = null;
-    }
-  } else {
-    lastAlarmDateKey = null;
-  }
-}
-
 /* ── SPOTIFY DEEP LINK ─────────────────────────────────── */
 function buildSpotifyUrls(rawUrl) {
   var raw = (rawUrl || '').trim();
@@ -1307,8 +720,6 @@ function buildSpotifyUrls(rawUrl) {
 }
 
 function doOpenSpotify(statusElId){
-  releaseAudioControl();
-  
   var sp   = loadSpotify();
   var urls = buildSpotifyUrls(sp.url);
   var el   = statusElId ? document.getElementById(statusElId) : null;
@@ -1321,6 +732,11 @@ function doOpenSpotify(statusElId){
       alert('Add your Spotify link in Settings first.');
     }
     return;
+  }
+
+  if (el) {
+    el.textContent = 'Opening Spotify…';
+    el.className = 'spotify-status ok';
   }
 
   var appOpened = false;
@@ -1347,24 +763,10 @@ function doOpenSpotify(statusElId){
   }, 2500);
 }
 
-/* ── ALARM STATUS LINE (main screen) ───────────────────── */
-function renderAlarmStatus(){
-  var el=document.getElementById('alarm-status-line');
-  if(!el) return;
-  var alarm=loadAlarm();
-  if(alarm.on&&alarm.time){
-    el.innerHTML='<div class="alarm-status-dot"></div>Alarm: '+fmt12(alarm.time)+' &middot; Snooze: '+(alarm.snooze||10)+' min';
-    el.classList.remove('hidden');
-  } else {
-    el.innerHTML=''; el.classList.add('hidden');
-  }
-}
-
 /* ── DATA BACKUP & RESTORE ────────────────────────────── */
 function exportBackup() {
   var backup = {
     roster: localStorage.getItem(ROSTER_KEY),
-    alarm: localStorage.getItem(ALARM_KEY),
     spotify: localStorage.getItem(SPOTIFY_KEY),
     dont_forget: localStorage.getItem(DONT_FORGET_KEY),
     notes: localStorage.getItem(NOTES_KEY),
@@ -1385,7 +787,6 @@ function importBackup(event) {
     try {
       var data = JSON.parse(e.target.result);
       if (data.hasOwnProperty('roster') && data.roster !== null) localStorage.setItem(ROSTER_KEY, data.roster);
-      if (data.hasOwnProperty('alarm') && data.alarm !== null) localStorage.setItem(ALARM_KEY, data.alarm);
       if (data.hasOwnProperty('spotify') && data.spotify !== null) localStorage.setItem(SPOTIFY_KEY, data.spotify);
       if (data.hasOwnProperty('dont_forget') && data.dont_forget !== null) localStorage.setItem(DONT_FORGET_KEY, data.dont_forget);
       if (data.hasOwnProperty('notes') && data.notes !== null) localStorage.setItem(NOTES_KEY, data.notes);
@@ -1410,9 +811,7 @@ function render(){
         +'<div class="empty-title">Set up your roster</div>'
         +'<div class="empty-sub">Enter your swing start date and roster pattern to start counting down.</div>'
         +'<button class="cta-btn" onclick="openPanel()">Enter Roster Details</button>'
-      +'</div>'
-      +'<div class="alarm-status-row hidden" id="alarm-status-line"></div>';
-    renderAlarmStatus();
+      +'</div>';
     return;
   }
 
@@ -1503,11 +902,16 @@ function render(){
       +'</div>';
   }
 
-  h+='</div>'
-    +'<div class="alarm-status-row hidden" id="alarm-status-line"></div>';
+  h+='</div>';
+
+  h += '<button class="spotify-btn" onclick="doOpenSpotify()">'
+    + '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">'
+      + '<path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.623.623 0 01-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 01-.277-1.215c3.809-.87 7.076-.496 9.712 1.115a.623.623 0 01.207.857zm1.223-2.722a.78.78 0 01-1.072.257c-2.687-1.652-6.785-2.131-9.965-1.166a.78.78 0 01-.973-.519.781.781 0 01.519-.972c3.632-1.102 8.147-.568 11.234 1.328a.78.78 0 01.257 1.072zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71a.937.937 0 11-.543-1.794c3.532-1.072 9.404-.865 13.115 1.338a.937.937 0 01-.955 1.613z"/>'
+    + '</svg>'
+    + '🎵 Open Spotify'
+    + '</button>';
 
   el.innerHTML=h;
-  renderAlarmStatus();
 }
 
 /* ── Settings PANEL — menu + subpages ──────────────────── */
@@ -1526,15 +930,12 @@ function handleOverlayClick(e){
 
 /* ── Main menu ─────────────────────────────────────────── */
 function renderSettingsMenu(){
-  var alarm=loadAlarm();
-  var alarmSub=alarm.on?('Alarm on · '+fmt12(alarm.time)):'Alarm off';
   var sp=loadSpotify();
   var spSub=sp.url?'Link saved':'No link saved';
 
   var h='<div class="panel-handle"></div>'
     +'<div class="panel-title">Settings</div>'
     +menuBtn('📅','Roster &amp; Shift','Swing dates, shifts &amp; pattern','openSubRoster()')
-    +menuBtn('⏰','Alarm',alarmSub,'openSubAlarm()')
     +menuBtn('🎵','Spotify',spSub,'openSubSpotify()')
     +menuBtn('📌',"Don't Forget List",'Packing &amp; check-in list','openSubDontForget()')
     +menuBtn('📝','Notes','Swing notes','openSubNotes()')
@@ -1616,111 +1017,6 @@ function setTodayAsDay1(){
   render();
   var msg=document.getElementById('today-day1-msg');
   if(msg){ msg.textContent='✓ Roster updated'; setTimeout(function(){ msg.textContent=''; },2500); }
-}
-
-/* ── Alarm subpage ─────────────────────────────────────── */
-function openSubAlarm(){
-  var alarm=loadAlarm();
-  var snooze=parseInt(alarm.snooze,10)||10;
-  var p5=snooze===5?'active':'', p10=snooze===10?'active':'', p15=snooze===15?'active':'';
-
-  var h='<div class="panel-handle"></div>'
-    +'<div class="panel-title">⏰ Alarm</div>'
-    +'<button class="sub-back-btn" onclick="renderSettingsMenu()">Back to Settings</button>'
-    +'<div class="panel-row">'
-      +'<div><div class="panel-row-label">Wake-up Alarm</div><div class="panel-row-sub" id="alarm-toggle-sub">'+(alarm.on?'Rings at '+fmt12(alarm.time)+' daily':'Off')+'</div></div>'
-      +'<div class="toggle-inline"><span class="toggle-status'+(alarm.on?' on':'')+'" id="alarm-toggle-label">'+(alarm.on?'ON':'OFF')+'</span>'
-      +'<label class="toggle"><input type="checkbox" id="alarm-toggle"'+(alarm.on?' checked':'')+' onchange="toggleAlarm(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>'
-    +'</div>'
-    +'<div class="form-group"><label for="alarm-time-input">Wake-up time</label><input type="time" class="time-input" id="alarm-time-input" value="'+(alarm.time||'06:00')+'"></div>'
-    +'<div class="form-group"><label>Snooze duration</label><div class="snooze-pills">'
-      +'<button type="button" class="snooze-pill '+p5+'" data-min="5" onclick="selectSnooze(5)">5 min</button>'
-      +'<button type="button" class="snooze-pill '+p10+'" data-min="10" onclick="selectSnooze(10)">10 min</button>'
-      +'<button type="button" class="snooze-pill '+p15+'" data-min="15" onclick="selectSnooze(15)">15 min</button>'
-    +'</div></div>'
-    +'<button class="panel-save-btn" onclick="saveAlarmSub()">Save Alarm</button>'
-    +'<div id="alarm-sub-msg" style="padding:10px 22px 0;font-size:13px;color:var(--ok);"></div>'
-    +'<div class="p-divider"></div>'
-    +'<div class="p-section-head">Alarm Sound (iOS Setup)</div>'
-    +'<div class="form-group" style="display:flex; flex-direction:column; gap:10px;">'
-      +'<button type="button" class="panel-save-notes-btn" id="enable-sound-btn" style="margin:0; width:100%;" onclick="enableAlarmSound()">🔊 Enable Alarm Sound</button>'
-      +'<button type="button" class="panel-save-notes-btn" id="test-sound-btn" style="margin:0; width:100%;" onclick="testAlarmSound()">🔊 Test Alarm Sound</button>'
-    +'</div>'
-    +'<div style="margin:18px 22px 0; background:rgba(224,90,78,0.08); border:1px solid rgba(224,90,78,0.25); border-radius:12px; padding:12px 14px;">'
-      +'<div style="font-size:12px; font-weight:700; color:var(--danger); margin-bottom:6px; letter-spacing:0.03em;">⚠️ Important</div>'
-      +'<div style="font-size:12px; color:var(--muted); line-height:1.55;">iPhone may stop web-based alarms if Safari is closed, the phone restarts, or iOS suspends background activity.<br><br>For best reliability, keep <strong style="color:var(--text);">Bedtime Mode active</strong> overnight.</div>'
-    +'</div>';
-  document.getElementById('settings-panel').innerHTML=h;
-
-  setTimeout(function(){
-    var ctx = getAudioCtx();
-    if (ctx && ctx.state === 'running') {
-      updateEnableBtn();
-    }
-  }, 50);
-}
-
-function toggleAlarm(on){
-  var alarm=loadAlarm(); alarm.on=on; saveAlarm(alarm);
-  var lbl=document.getElementById('alarm-toggle-label');
-  var sub=document.getElementById('alarm-toggle-sub');
-  if(lbl){ lbl.textContent=on?'ON':'OFF'; lbl.className='toggle-status'+(on?' on':''); }
-  if(sub){ sub.textContent=on?('Rings at '+fmt12(alarm.time)+' daily'):'Off'; }
-  if(!on){ alarmFired=false; snoozeUntilTs=null; }
-  
-  if (on) {
-    audioReleasedForSpotify = false;
-    var ctx = getAudioCtx();
-    if (ctx) {
-      ctx.resume().then(function() {
-        startKeepAlive();
-      }).catch(function(){});
-    }
-    playSilentLoop();
-  }
-
-  initAlarmState();
-  renderAlarmStatus();
-}
-
-function selectSnooze(mins){
-  document.querySelectorAll('.snooze-pill').forEach(function(p){
-    p.classList.toggle('active', parseInt(p.dataset.min,10)===mins);
-  });
-  var alarm=loadAlarm(); alarm.snooze=mins; saveAlarm(alarm);
-}
-
-function saveAlarmSub(){
-  var t=document.getElementById('alarm-time-input').value;
-  if(!t){ showPanelMsg('Please pick a wake-up time.'); return; }
-  var alarm=loadAlarm();
-  var prevTime=alarm.time;
-  alarm.time=t;
-  alarm.on=document.getElementById('alarm-toggle').checked;
-  var activePill=document.querySelector('.snooze-pill.active');
-  alarm.snooze=activePill?parseInt(activePill.dataset.min,10):(alarm.snooze||10);
-  saveAlarm(alarm);
-  
-  alarmFired=false;
-  snoozeUntilTs=null;
-  audioReleasedForSpotify = false;
-  if(t !== prevTime){
-    lastAlarmDateKey=null;
-  }
-  
-  initAlarmState();
-  renderAlarmStatus();
-  
-  var ctx = getAudioCtx();
-  if (ctx) {
-    ctx.resume().then(function() {
-      startKeepAlive();
-    }).catch(function(){});
-  }
-  playSilentLoop();
-
-  var msg=document.getElementById('alarm-sub-msg');
-  if(msg){ msg.textContent='✓ Alarm saved'; setTimeout(function(){ msg.textContent=''; },2000); }
 }
 
 /* ── Spotify subpage ───────────────────────────────────── */
@@ -1869,7 +1165,6 @@ function showPanelMsg(msg){
 })();
 
 render();
-initAlarmState();
 var msToMidnight=function(){
   var n=new Date();
   return new Date(n.getFullYear(),n.getMonth(),n.getDate()+1)-n;

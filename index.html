@@ -55,7 +55,7 @@
   }
   #splash.fade-out { opacity: 0; pointer-events: none; }
   #splash::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    content: ''; position: absolute; inset: 0;
     background-image:
       linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
@@ -1230,7 +1230,7 @@ function checkAlarm(){
   
   var alarm = loadAlarm(); if (!alarm.on || !alarm.time) return;
   var nowD = new Date();
-  var dateKey = nowD.toLocaleDateString('en-CA') + '_' + alarm.time;
+  var dateKey = nowD.getFullYear() + '-' + String(nowD.getMonth() + 1).padStart(2, '0') + '-' + String(nowD.getDate()).padStart(2, '0') + '_' + alarm.time;
   
   var timeParts = alarm.time.split(':');
   var sched = new Date();
@@ -1251,7 +1251,7 @@ function initAlarmState() {
   var alarm = loadAlarm();
   if (alarm.on && alarm.time) {
     var nowD = new Date();
-    var dateKey = nowD.toLocaleDateString('en-CA') + '_' + alarm.time;
+    var dateKey = nowD.getFullYear() + '-' + String(nowD.getMonth() + 1).padStart(2, '0') + '-' + String(nowD.getDate()).padStart(2, '0') + '_' + alarm.time;
     var timeParts = alarm.time.split(':');
     var sched = new Date();
     sched.setHours(parseInt(timeParts[0],10), parseInt(timeParts[1],10), 0, 0);
